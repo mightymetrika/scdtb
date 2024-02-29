@@ -1,6 +1,10 @@
 nap <- function(.df, .y, .phase, .time, type = c("reversability", "trend"), last_m = NULL,
                 phases, improvement = c("positive", "negative")){
 
+  # Get argument from choices
+  improvement <- match.arg(improvement)
+  type <- match.arg(type)
+
   # Sort the data frame by time within each phase
   .df <- .df[order(.df[[.phase]], .df[[.time]]), ]
 
@@ -23,10 +27,8 @@ nap <- function(.df, .y, .phase, .time, type = c("reversability", "trend"), last
     sapply(series[[2]], function(item2) {
       if(improvement == "positive"){
         ifelse(item1 < item2, 1, ifelse(item1 > item2, 0, 0.5))
-      } else if (improvement == "negative"){
-        ifelse(item1 > item2, 1, ifelse(item1 < item2, 0, 0.5))
       } else {
-        stop("improvement must be set to 'positive' or 'negative'")
+        ifelse(item1 > item2, 1, ifelse(item1 < item2, 0, 0.5))
       }
 
     })
@@ -37,12 +39,3 @@ nap <- function(.df, .y, .phase, .time, type = c("reversability", "trend"), last
 
 
 }
-
-
-
-
-# .df <- basic_scd
-# .y <- "socbehavs"
-# .phase <- "phase"
-# phases <- list("baseline")
-# last_m <- 3
