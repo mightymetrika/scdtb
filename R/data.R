@@ -31,3 +31,26 @@
 #' @source <https://ies.ed.gov/ncee/WWC/Docs/referenceresources/Final_WWC-HandbookVer5_0-0-508.pdf>
 "reversal_withdrawal"
 
+
+#' Fictional Single Case Design Efficacy of CBT Example
+#'
+#' This is the data set used for the clinical case example in Maric & van der Werf
+#' (2020).
+#'
+#' @references Maric, M., & van der Werff, V. (2020). Single-Case Experimental
+#' Designs in Clinical Intervention Research. In R. van de Schoot & M. Miocevic
+#' (Eds.), Small Sample Size Solutions: A Guide for Applied Researchers and
+#' Practitioners (1st ed., pp. 10). Routledge.
+#' https://doi.org/10.4324/9780429273872
+#'
+#' @format ## `efficacy_of_CBT`
+#' A data frame with 10 rows and 4 columns:
+#' \describe{
+#'   \item{phase}{Study phase}
+#'   \item{time}{Time of data collection}
+#'   \item{Anxious}{Outcome measure}
+#'   \item{CATS_N}{Outcome measure}
+#' }
+#' @source <https://doi.org/10.4324/9780429273872>
+"efficacy_of_CBT"
+
