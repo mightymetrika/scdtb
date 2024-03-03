@@ -54,3 +54,23 @@
 #' @source <https://doi.org/10.4324/9780429273872>
 "efficacy_of_CBT"
 
+#' Sleeping Pills and Dizziness Example
+#'
+#' This is the data set used for the example in Onghena (2020).
+#'
+#' @references Onghena, P. (2020). One by one: The design and analysis of
+#' replicated randomized single-case experiments. In R. van de Schoot & M. Miocevic
+#' (Eds.), Small sample size solutions: A guide for applied researchers and
+#' practitioners (1st ed., pp. 15). Routledge. https://doi.org/10.4324/9780429273872
+#'
+#' @format ## `sleeping_pills`
+#' A data frame with 14 rows and 3 columns:
+#' \describe{
+#'   \item{day}{day of study}
+#'   \item{treatment}{E, Experimental; C, Control}
+#'   \item{sever_compl}{Severity of complaints}
+#' }
+#' @source <https://doi.org/10.4324/9780429273872>
+"sleeping_pills"
+
+
