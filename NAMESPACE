@@ -3,4 +3,5 @@
 S3method(plot,cross_lagged)
 S3method(print,cross_lagged)
 export(cross_lagged)
+export(nap)
 export(randomization_test)

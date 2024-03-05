@@ -43,6 +43,11 @@
 cross_lagged <- function(.df, .x, .y, lag.max = 5, na.action = stats::na.fail,
                          conf.level = 0.95, ...){
 
+  if(!is.data.frame(.df)) stop(".df must be a data frame")
+  if(!(.x %in% names(.df))) stop(".x must be a variable in .df")
+  if(!(.y %in% names(.df))) stop(".y must be a variable in .df")
+  if(!(conf.level >= 0 & conf.level <= 1)) stop("conf.level must be between 0 and 1")
+
   # Get cross lagged correlation or covariance
   cl <- stats::ccf(x = .df[[.x]], y = .df[[.y]], lag.max, type = "correlation",
                    plot = FALSE, na.action, ...)
@@ -100,6 +105,9 @@ cross_lagged <- function(.df, .x, .y, lag.max = 5, na.action = stats::na.fail,
 #' @export
 plot.cross_lagged <- function(x, ...) {
 
+  # Parameter checks
+  if(!inherits(x, "cross_lagged"))stop("x must be an object of class cross_lagged")
+
   # Set local variables
   lag <- NULL
   acf <- NULL
@@ -156,6 +164,9 @@ plot.cross_lagged <- function(x, ...) {
 #'
 #' @export
 print.cross_lagged <- function(x, ...) {
+
+  # Parameter checks
+  if(!inherits(x, "cross_lagged"))stop("x must be an object of class cross_lagged")
 
   # Create a data frame with lag and acf
   results <- data.frame(lag = x$lag[,,1], acf = x$acf[,,1])
