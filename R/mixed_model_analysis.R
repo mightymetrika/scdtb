@@ -103,20 +103,8 @@ mixed_model_analysis <- function(.df, .dv, .time, .phase, .participant = NULL,
     ggplot2::xlab("time")+
     ggplot2::scale_colour_manual(values=c("red"  = "red", "blue" = "blue"),
                                  labels= c("data", "model"))+
-    # scale_x_continuous(breaks= 1:10, minor_breaks = NULL)+
-    # scale_y_continuous(breaks= seq(0, 18, 2), minor_breaks = NULL, limits = c(0, 18))+
     ggplot2::theme(axis.ticks.x=ggplot2::element_blank(),
-                   legend.title = ggplot2::element_blank()) #+
-    # annotate(geom="text",
-    #          x=3,
-    #          y=17,
-    #          label="Exposure",
-    #          color="black")+
-    # annotate(geom="text",
-    #          x=8,
-    #          y=17,
-    #          label="Exposure + CT",
-    #          color="black")
+                   legend.title = ggplot2::element_blank())
 
   return(list(data = .df,
               fitted_mod = mod,
