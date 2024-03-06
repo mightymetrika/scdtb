@@ -3,5 +3,6 @@
 S3method(plot,cross_lagged)
 S3method(print,cross_lagged)
 export(cross_lagged)
+export(mixed_model_analysis)
 export(nap)
 export(randomization_test)
