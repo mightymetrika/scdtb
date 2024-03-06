@@ -1,3 +1,51 @@
+#' Mixed Model Analysis
+#'
+#' Performs a mixed model analysis on a dataset, allowing for the specification
+#' of a dependent variable, time variable, phase variable, participant
+#' identification, and covariates. It supports reverse timing within phases,
+#' custom phase levels and labels, and adds covariates to the fixed effects model.
+#' The function fits a model using generalized least squares and returns
+#' a list containing the modified dataset, the fitted model, and a plot of
+#' predicted values with phase annotations.
+#'
+#' @param .df A data frame containing the dataset to be analyzed.
+#' @param .dv The name of the dependent variable in the dataset.
+#' @param .time The name of the time variable in the dataset.
+#' @param .phase The name of the phase variable in the dataset.
+#' @param .participant (optional) The name of the participant identifier variable
+#'         in the dataset. If not provided, a default factor will be used.
+#' @param rev_time_in_phase (optional) A boolean indicating whether to reverse
+#'        the timing within each phase. Defaults to FALSE.
+#' @param phase_levels (optional) A vector of phase levels to be used for the phase
+#'        variable. If NULL, the unique values in the phase variable will be used.
+#' @param phase_labels (optional) A vector of labels corresponding to the phase_levels.
+#'        If NULL, phase_levels will be used as labels.
+#' @param covs (optional) A vector of names of covariates to be added to the
+#'        fixed effect model.
+#' @param ... Additional arguments passed to the `gls` function.
+#'
+#' @return A list containing three elements:
+#'         - `data`: The modified dataset with added time variables and predicted
+#'            values.
+#'         - `fitted_mod`: The fitted model object from `nlme::gls`.
+#'         - `plot`: A ggplot object showing the predicted values and phase
+#'            annotations.
+#'
+#' @references Maric, M., & van der Werff, V. (2020). Single-Case Experimental
+#' Designs in Clinical Intervention Research. In R. van de Schoot & M. Miocevic
+#' (Eds.), Small Sample Size Solutions: A Guide for Applied Researchers and
+#' Practitioners (1st ed., pp. 10). Routledge.
+#' https://doi.org/10.4324/9780429273872
+#'
+#' @examples
+#' res <- mixed_model_analysis(efficacy_of_CBT, .dv = "Anxious", .time = "time",
+#'                             .phase = "phase",rev_time_in_phase = TRUE,
+#'                             phase_levels = c(0, 1),
+#'                             phase_labels = c("Exposure", "Exposure + CT"))
+#'
+#' summary(res$fitted_mod)
+#'
+#' @export
 mixed_model_analysis <- function(.df, .dv, .time, .phase, .participant = NULL,
                                  rev_time_in_phase = FALSE, phase_levels = NULL,
                                  phase_labels = NULL, covs = NULL, ...) {
@@ -106,16 +154,30 @@ mixed_model_analysis <- function(.df, .dv, .time, .phase, .participant = NULL,
                                x = (start_points + end_points) / 2,
                                y = rep(max(.df[[.dv]]) * 1.05, length(start_points))) # Adjust Y position as needed
 
-  # Plot data with predicted values
+  # Plot predicted values
   ggp <- ggplot2::ggplot()+
     ggplot2::geom_line(data= .df, ggplot2::aes(x =time,
                                                y = .data[[paste0("predicted_", .dv)]],
                                                col = "red"),
-                       size= 2)+
-    ggplot2::geom_point(data= .df, ggplot2::aes(x =time,
-                                                 y= .data[[.dv]],
-                                                 col = "blue"),
-                        size= 2)+
+                       size= 2)
+
+  # Add data points to plot (conditionally use shapes to distinguish participants)
+  if (is.null(.participant)){
+    ggp <- ggp + ggplot2::geom_point(data= .df, ggplot2::aes(x =time,
+                                                             y= .data[[.dv]],
+                                                             col = "blue"),
+                                     size= 2)
+  } else {
+    ggp <- ggp + ggplot2::geom_point(data= .df, ggplot2::aes(x =time,
+                                                             y= .data[[.dv]],
+                                                             col = "blue",
+                                                             shape = factor(.data[[.participant]])),
+                                     size= 2)
+
+  }
+
+  # Add phases and styling to plot
+  ggp <- ggp +
     ggplot2::geom_vline(xintercept = midpoints,
                         linetype = "dashed",
                         size= 1.2)+
@@ -128,6 +190,7 @@ mixed_model_analysis <- function(.df, .dv, .time, .phase, .participant = NULL,
     ggplot2::theme(axis.ticks.x=ggplot2::element_blank(),
                    legend.title = ggplot2::element_blank())
 
+  # Return results
   return(list(data = .df,
               fitted_mod = mod,
               plot = ggp))
