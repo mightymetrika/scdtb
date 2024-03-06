@@ -1,6 +1,6 @@
 mixed_model_analysis <- function(.df, .dv, .time, .phase, .participant = NULL,
                                  rev_time_in_phase = FALSE, phase_levels = NULL,
-                                 phase_labels = NULL) {
+                                 phase_labels = NULL, covs = NULL, ...) {
 
   # Initialize local variables
   time <- NULL
@@ -9,8 +9,18 @@ mixed_model_analysis <- function(.df, .dv, .time, .phase, .participant = NULL,
   y <- NULL
   label <- NULL
 
+  # Initial parameter checks
+  if(!is.data.frame(.df)) stop(".df must be a data frame")
+  if(!(.dv %in% names(.df))) stop(".dv must be a variable in .df")
+  if(!(.time %in% names(.df))) stop(".time must be a variable in .df")
+  if(!(.phase %in% names(.df))) stop(".phase must be a variable in .df")
+  if(!(is.logical(rev_time_in_phase) & length(rev_time_in_phase) == 1))stop("rev_time_in_phase must be boolean")
+
   # Set factor levels and labels of the phase variable
   if(!is.null(phase_levels)){
+
+    # Check phase levels
+    if(!all(phase_levels %in% unique(.df[[.phase]]))) stop(paste0("phase_levels contains values that are not found in: ", .phase))
 
     # Check dimension of labels agains levels
     if(!is.null(phase_labels)){
@@ -53,8 +63,19 @@ mixed_model_analysis <- function(.df, .dv, .time, .phase, .participant = NULL,
   # Combine the list of data frames back into a single data frame
   .df <- do.call(rbind, split_df)
 
-  # Set up fixed effect portion of model formula
-  mod_form <- stats::as.formula(paste0(.dv, " ~ ", "time_in_phase + ",.phase, " + time_in_phase*",.phase))
+  # Set up fixed effect independent variable portion of model formula
+  mod_form <- paste0("time_in_phase + ",.phase, " + time_in_phase*",.phase)
+
+  # Add fixed effect covariates to the base model
+  if (!is.null(covs)) {
+    # Parameter check covs
+    if(!all(covs %in% names(.df))) stop(paste0("covs contains variables that are not found in .df"))
+
+    mod_form <- paste(mod_form, "+", covs)
+  }
+
+  # Add dependent variable
+  mod_form <- stats::as.formula(paste0(.dv, " ~ ", mod_form))
 
   # Set up random effect portion of model formula
   if (is.null(.participant)){
@@ -68,7 +89,8 @@ mixed_model_analysis <- function(.df, .dv, .time, .phase, .participant = NULL,
   mod <- nlme::gls(model       = mod_form,
                    data        = .df,
                    method      = "REML",
-                   correlation = nlme::corAR1(, form=re_form))
+                   correlation = nlme::corAR1(, form=re_form),
+                   ...)
 
   # Get predicted values
   .df[[paste0("predicted_", .dv)]] <- stats::predict(mod)

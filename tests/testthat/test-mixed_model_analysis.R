@@ -1,61 +1,98 @@
-# test_that("multiplication works", {
-#   data <- data.frame(phase         = as.factor(c(rep(0,5), rep(1,5))),
-#                      time_in_phase = rep(4:0, 2),
-#                      Anxious       = c(17, 14, 13, 13, 7, 10, 8,11, 10, 12),
-#                      CATS_N        = c(2,4,2,4,2, 8,5,8,7,6),
-#                      time          = 1:10,
-#                      participant   = factor(rep("x",10)))
-#
-#   m1 <- nlme::gls(model       = Anxious ~ time_in_phase + phase + time_in_phase*phase,
-#             data        = data,
-#             method      = "REML",
-#             correlation = nlme::corAR1(, form=~time|participant))
-#
-#   summary(m1)
-#   intervals(m1)
-#   expect_equal(2 * 2, 4)
-#
-#   data <- data.frame(phase         = as.factor(c(rep(0,5), rep(1,5))),
-#                      time_in_phase = rep(0:4, 2),
-#                      Anxious       = c(17, 14, 13, 13, 7, 10, 8,11, 10, 12),
-#                      CATS_N        = c(2,4,2,4,2, 8,5,8,7,6),
-#                      time          = 1:10,
-#                      participant   = factor(rep("x",10)))
-#
-#   m1 <- nlme::gls(model       = Anxious ~ time_in_phase + phase + time_in_phase*phase,
-#                   data        = data,
-#                   method      = "REML",
-#                   correlation = nlme::corAR1(, form=~time|participant))
-#
-#   summary(m1)
-# })
-# data <- data.frame(phase         = as.factor(c(rep(0,5), rep(1,5))),
-#                    time_in_phase = rep(4:0, 2),
-#                    Anxious       = c(17, 14, 13, 13, 7, 10, 8,11, 10, 12),
-#                    CATS_N        = c(2,4,2,4,2, 8,5,8,7,6),
-#                    time          = 1:10,
-#                    participant   = factor(rep("x",10)))
-#
-# m1 <- nlme::gls(model       = CATS_N ~ time_in_phase + phase + time_in_phase*phase,
-#                 data        = data,
-#                 method      = "REML",
-#                 correlation = nlme::corAR1(, form=~time|participant))
-#
-# summary(m1)
-#
-# data <- data.frame(phase         = as.factor(c(rep(0,5), rep(1,5))),
-#                    time_in_phase = rep(0:4, 2),
-#                    Anxious       = c(17, 14, 13, 13, 7, 10, 8,11, 10, 12),
-#                    CATS_N        = c(2,4,2,4,2, 8,5,8,7,6),
-#                    time          = 1:10,
-#                    participant   = factor(rep("x",10)))
-#
-# m1 <- nlme::gls(model       = CATS_N ~ time_in_phase + phase + time_in_phase*phase,
-#                 data        = data,
-#                 method      = "REML",
-#                 correlation = nlme::corAR1(, form=~time|participant))
-#
-# summary(m1)
-#
-# tst <- mixed_model_analysis(reversal_withdrawal, .dv = "extbehavs", .time = "time", .phase = "phase",
-#                             phase_levels = c("baseline1", "treatment1", "baseline2", "treatment2"))
+test_that("mixed_model_analysis reproduces the results in Table 7.1 works of
+          Maric, M., & van der Werff, V. (2020) using the Anxious outcome", {
+
+  res <- mixed_model_analysis(efficacy_of_CBT, .dv = "Anxious", .time = "time",
+                              .phase = "phase",rev_time_in_phase = TRUE,
+                              phase_levels = c(0, 1),
+                              phase_labels = c("Exposure", "Exposure + CT"))
+
+  expect_equal(length(res), 3)
+
+})
+
+test_that("mixed_model_analysis reproduces the results in Table 7.1 works of
+          Maric, M., & van der Werff, V. (2020) using the Negative Cognitions
+          outcome", {
+
+            res <- mixed_model_analysis(efficacy_of_CBT, .dv = "CATS_N", .time = "time",
+                                        .phase = "phase",rev_time_in_phase = TRUE,
+                                        phase_levels = c(0, 1),
+                                        phase_labels = c("Exposure", "Exposure + CT"))
+
+            expect_equal(length(res), 3)
+
+          })
+
+test_that("mixed_model_analysis fails when .df is not a data frame", {
+
+  expect_error(mixed_model_analysis(as.character(efficacy_of_CBT), .dv = "CATS_N",
+                                    .time = "time", .phase = "phase",
+                                    rev_time_in_phase = TRUE, phase_levels = c(0, 1),
+                                    phase_labels = c("Exposure", "Exposure + CT")),
+               ".df must be a data frame")
+
+})
+
+test_that("mixed_model_analysis fails when .dv is not found if .df", {
+
+  expect_error(mixed_model_analysis(efficacy_of_CBT, .dv = "hello_world",
+                                    .time = "time", .phase = "phase",
+                                    rev_time_in_phase = TRUE, phase_levels = c(0, 1),
+                                    phase_labels = c("Exposure", "Exposure + CT")),
+               ".dv must be a variable in .df")
+
+})
+
+test_that("mixed_model_analysis fails when rev_time_in_phase is not bolean", {
+
+  expect_error(mixed_model_analysis(efficacy_of_CBT, .dv = "CATS_N",
+                                    .time = "time", .phase = "phase",
+                                    rev_time_in_phase = 25, phase_levels = c(0, 1),
+                                    phase_labels = c("Exposure", "Exposure + CT")),
+               "rev_time_in_phase must be boolean")
+
+})
+
+test_that("mixed_model_analysis fails when phase_levels are not found in .phase", {
+
+  expect_error(mixed_model_analysis(efficacy_of_CBT, .dv = "CATS_N",
+                                    .time = "time", .phase = "phase",
+                                    rev_time_in_phase = TRUE, phase_levels = c("hello", "world"),
+                                    phase_labels = c("Exposure", "Exposure + CT")),
+               "phase_levels contains values that are not found in: phase")
+
+})
+
+test_that("mixed_model_analysis fails when phase_levels and phase_labels are not
+          of the same length", {
+
+  expect_error(mixed_model_analysis(efficacy_of_CBT, .dv = "CATS_N",
+                                    .time = "time", .phase = "phase",
+                                    rev_time_in_phase = TRUE, phase_levels = c(0, 1),
+                                    phase_labels = c("Exposure", "Exposure + CT", "hello")),
+               "phase_levels and phase_labels must have the same length")
+
+})
+
+test_that("mixed_model_analysis works with covs", {
+
+            res <- mixed_model_analysis(efficacy_of_CBT, .dv = "CATS_N",
+                                              .time = "time", .phase = "phase",
+                                              rev_time_in_phase = TRUE, phase_levels = c(0, 1),
+                                              phase_labels = c("Exposure", "Exposure + CT"),
+                                              covs = c("Anxious"))
+
+            expect_equal(length(res), 3)
+
+          })
+
+test_that("mixed_model_analysis fails when covs not found in .df", {
+
+  expect_error(mixed_model_analysis(efficacy_of_CBT, .dv = "CATS_N",
+                                    .time = "time", .phase = "phase",
+                                    rev_time_in_phase = TRUE, phase_levels = c(0, 1),
+                                    phase_labels = c("Exposure", "Exposure + CT"),
+                                    covs = c("hello_world")),
+               "covs contains variables that are not found in .df")
+
+})
