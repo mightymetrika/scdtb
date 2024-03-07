@@ -65,25 +65,7 @@ mixed_model_analysis <- function(.df, .dv, .time, .phase, .participant = NULL,
   if(!(is.logical(rev_time_in_phase) & length(rev_time_in_phase) == 1))stop("rev_time_in_phase must be boolean")
 
   # Set factor levels and labels of the phase variable
-  if(!is.null(phase_levels)){
-
-    # Check phase levels
-    if(!all(phase_levels %in% unique(.df[[.phase]]))) stop(paste0("phase_levels contains values that are not found in: ", .phase))
-
-    # Check dimension of labels agains levels
-    if(!is.null(phase_labels)){
-      if(length(phase_levels) != length(phase_labels)){
-        stop("phase_levels and phase_labels must have the same length")
-      }
-
-      ph_labs <- phase_labels # Set labels
-    } else {
-      ph_labs <- phase_levels # Set labels
-    }
-
-    # Explicitly define phase variable as a factor with specified levels and labels
-    .df[[.phase]] <- factor(.df[[.phase]], levels = phase_levels, labels = ph_labs)
-  }
+  .df <- process_phase(.df, .phase, phase_levels, phase_labels)
 
   # Sort the data frame by phase and then by time
   .df <- .df[order(.df[[.phase]], .df[[.time]]), ]

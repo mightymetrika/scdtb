@@ -74,31 +74,7 @@ randomization_test <- function(.df, .out, .cond, .time, num_permutations = NULL,
   if(!(conf.level >= 0 & conf.level <= 1)) stop("conf.level must be between 0 and 1")
 
   # Set factor levels and labels of the condition variable
-  if(!is.null(cond_levels)){
-
-    #Check cond_levels
-    unique_cond_vals <- unique(.df[[.cond]])
-    if(!all(cond_levels %in% unique_cond_vals)) stop(paste0("cond_levels contains values that are not found in: ", .cond))
-
-    # Check dimension of labels agains levels
-    if(!is.null(cond_labels)){
-      if(length(cond_levels) != length(cond_labels)){
-        stop("cond_levels and cond_labels must have the same length")
-      }
-
-      cond_labs <- cond_labels # Set labels
-    } else {
-      cond_labs <- cond_levels # Set labels
-    }
-
-    # Explicitly define phase variable as a factor with specified levels and labels
-    .df[[.cond]] <- factor(.df[[.cond]], levels = cond_levels, labels = cond_labs)
-  }
-
-  # Make sure .cond is a factor
-  if (!is.factor(.df[[.cond]])){
-    .df[[.cond]] <- as.factor(.df[[.cond]])
-  }
+  .df <- process_cond(.df, .cond, cond_levels, cond_labels)
 
   # Get unique factor levels
   cond_vec <- levels(.df[[.cond]])
