@@ -27,5 +27,6 @@ test_that("crossed_lagged works like example in Maric & Werf",{
 
   cl <- cross_lagged(.df = data, .x = "CATS_N", .y = "Anxious")
 
-
+  expect_equal(length(cl), 8)
+  expect_s3_class(cl, "cross_lagged")
 })
