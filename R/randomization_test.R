@@ -159,9 +159,9 @@ randomization_test <- function(.df, .out, .cond, .time, num_permutations = NULL,
   # Get distribution plot
   dist_plot <- ggplot2::ggplot(data.frame(x = test_statistic_distribution), ggplot2::aes(x = x)) +
     ggplot2::geom_histogram(bins = .bins) + # Adjusted for better visualization
-    ggplot2::geom_vline(xintercept = conf_int[1], linetype = "dotted", color = "red", size = 1) + # Lower bound
-    ggplot2::geom_vline(xintercept = conf_int[2], linetype = "dotted", color = "red", size = 1) + # Upper bound
-    ggplot2::geom_vline(xintercept = original_diff, linetype = "dotted", color = "blue", size = 1) + # Original diff
+    ggplot2::geom_vline(xintercept = conf_int[1], linetype = "dotted", color = "red") + # Lower bound
+    ggplot2::geom_vline(xintercept = conf_int[2], linetype = "dotted", color = "red") + # Upper bound
+    ggplot2::geom_vline(xintercept = original_diff, linetype = "dotted", color = "blue") + # Original diff
     ggplot2::theme_minimal() +
     ggplot2::xlab("Mean Difference") +
     ggplot2::ggtitle("Distribution of Mean Differences with 95% CI and Original Difference")

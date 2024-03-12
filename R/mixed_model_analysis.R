@@ -140,8 +140,7 @@ mixed_model_analysis <- function(.df, .dv, .time, .phase, .participant = NULL,
   ggp <- ggplot2::ggplot()+
     ggplot2::geom_line(data= .df, ggplot2::aes(x =time,
                                                y = .data[[paste0("predicted_", .dv)]],
-                                               col = "red"),
-                       size= 2)
+                                               col = "red"))
 
   # Add data points to plot (conditionally use shapes to distinguish participants)
   if (is.null(.participant)){
@@ -161,8 +160,7 @@ mixed_model_analysis <- function(.df, .dv, .time, .phase, .participant = NULL,
   # Add phases and styling to plot
   ggp <- ggp +
     ggplot2::geom_vline(xintercept = midpoints,
-                        linetype = "dashed",
-                        size= 1.2)+
+                        linetype = "dashed")+
     ggplot2::geom_text(data = annotations_df, ggplot2::aes(x = x, y = y, label = label), inherit.aes = FALSE) +
     ggplot2::theme_minimal()+
     ggplot2::ylab(.dv)+
