@@ -2,7 +2,11 @@ process_cond <- function(.df, .cond, cond_levels, cond_labels){
   # Set factor levels and labels of the condition variable
   if(!is.null(cond_levels)){
 
-    #Check cond_levels
+    # Initial parameter checks
+    if(!is.character(.cond))stop(".cond must be an object of type character")
+    if(!(.cond %in% names(.df))) stop(".cond must be a variable in .df")
+
+    # Check cond_levels
     unique_cond_vals <- unique(.df[[.cond]])
     if(!all(cond_levels %in% unique_cond_vals)) stop(paste0("cond_levels contains values that are not found in: ", .cond))
 
@@ -33,6 +37,10 @@ process_phase <- function(.df, .phase, phase_levels, phase_labels){
   # Set factor levels and labels of the phase variable
   if(!is.null(phase_levels)){
 
+    # Initial parameter checks
+    if(!is.character(.phase))stop(".phase must be an object of type character")
+    if(!(.phase %in% names(.df))) stop(".phase must be a variable in .df")
+
     # Check phase levels
     if(!all(phase_levels %in% unique(.df[[.phase]]))) stop(paste0("phase_levels contains values that are not found in: ", .phase))
 
@@ -58,3 +66,5 @@ process_phase <- function(.df, .phase, phase_levels, phase_labels){
 
   return(.df)
 }
+
+
