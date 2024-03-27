@@ -10,12 +10,12 @@ scdtb <- function(){
                          accept = c("text/csv",
                                     "text/comma-separated-values,text/plain",
                                     ".csv")),
-        shiny::textInput("outcome", "Outcome Variable", value = NULL),
-        shiny::textInput("time", "Time Variable", value = NULL),
-        shiny::textInput("phase", "Phase Variable", value = NULL),
-        shiny::textInput("condition", "Condition Variable", value = NULL),
-        shiny::textInput("participant", "Participant Identifier", value = NULL),
-        shiny::textInput("xout", "Additional Outcome Variable", value = NULL),
+        shiny::textInput("outcome", "Outcome Variable"),
+        shiny::textInput("time", "Time Variable"),
+        shiny::textInput("phase", "Phase Variable"),
+        shiny::textInput("condition", "Condition Variable"),
+        shiny::textInput("participant", "Participant Identifier"),
+        shiny::textInput("xout", "Additional Outcome Variable"),
         shiny::actionButton("raw_plot_in", "Plot Data"),
         ),
       shiny::mainPanel(
@@ -31,6 +31,19 @@ scdtb <- function(){
 
     # Reactive: Read the uploaded CSV file
     uploaded_data <- shiny::reactiveVal()
+
+    # Reactive expressions for validated/transformed inputs
+    reactive_phase <- shiny::reactive({
+      if (input$phase != "") { input$phase } else { NULL }
+    })
+
+    reactive_condition <- shiny::reactive({
+      if (input$condition != "") { input$condition } else { NULL }
+    })
+
+    reactive_participant <- shiny::reactive({
+      if (input$participant != "") { input$participant } else { NULL }
+    })
 
     shiny::observe({
       inFile <- input$datafile
@@ -106,22 +119,29 @@ scdtb <- function(){
     })
 
     # Get raw plot
+    # shiny::observeEvent(input$raw_plot_in, {
+    #   shiny::req(uploaded_data(), input$outcome, input$time)
+    #
+    #   output$raw_plot_out <- shiny::renderPlot({
+    #     .phase <- if (input$phase != "") input$phase else NULL
+    #     .cond <- if (input$condition != "") input$condition else NULL
+    #     .participant <- if (input$participant != "") input$participant else NULL
+    #
+    #     raw_plot(.df = uploaded_data(), .out = input$outcome,
+    #              .time = input$time, .phase = .phase, .cond = .cond,
+    #              .participant = .participant)
+    #   })
+    # })
+
     shiny::observeEvent(input$raw_plot_in, {
-      shiny::req(uploaded_data(), input$outcome)
+      shiny::req(uploaded_data(), input$outcome, input$time)
 
       output$raw_plot_out <- shiny::renderPlot({
         raw_plot(.df = uploaded_data(), .out = input$outcome,
-                 .time = input$time, .phase = input$phase,
-                 .cond = input$condition, .participant = input$participant)
-
+                 .time = input$time, .phase = reactive_phase(),
+                 .cond = reactive_condition(), .participant = reactive_participant())
       })
-
     })
-
-
-
-
-
 
   }
 
