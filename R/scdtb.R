@@ -17,11 +17,15 @@ scdtb <- function(){
         shiny::textInput("participant", "Participant Identifier"),
         shiny::textInput("xout", "Additional Outcome Variable"),
         shiny::actionButton("raw_plot_in", "Plot Data"),
+        shiny::textInput("cov", "Covariates"),
+        shiny::actionButton("mem", "Run Mixed Model")
         ),
       shiny::mainPanel(
         shiny::uiOutput("variables_title"),
         DT::dataTableOutput("variables_table"),
         shiny::plotOutput("raw_plot_out"),
+        shiny::verbatimTextOutput("mem_out"),
+        shiny::plotOutput("mem_plot_out"),
         )
       )
   )
@@ -29,10 +33,12 @@ scdtb <- function(){
   # Server
   server <- function(input, output, session){
 
-    # Reactive: Read the uploaded CSV file
+    ## Set Up Reactive Values
+
+    # reactive: Read the uploaded CSV file
     uploaded_data <- shiny::reactiveVal()
 
-    # Reactive expressions for validated/transformed inputs
+    # reactive expressions for validated/transformed inputs
     reactive_phase <- shiny::reactive({
       if (input$phase != "") { input$phase } else { NULL }
     })
@@ -44,6 +50,12 @@ scdtb <- function(){
     reactive_participant <- shiny::reactive({
       if (input$participant != "") { input$participant } else { NULL }
     })
+
+    reactive_covs <- shiny::reactive({
+      if (input$cov != "") { input$cov } else { NULL }
+    })
+
+    ## Data Upload & Handle Data Types
 
     shiny::observe({
       inFile <- input$datafile
@@ -118,20 +130,7 @@ scdtb <- function(){
       }
     })
 
-    # Get raw plot
-    # shiny::observeEvent(input$raw_plot_in, {
-    #   shiny::req(uploaded_data(), input$outcome, input$time)
-    #
-    #   output$raw_plot_out <- shiny::renderPlot({
-    #     .phase <- if (input$phase != "") input$phase else NULL
-    #     .cond <- if (input$condition != "") input$condition else NULL
-    #     .participant <- if (input$participant != "") input$participant else NULL
-    #
-    #     raw_plot(.df = uploaded_data(), .out = input$outcome,
-    #              .time = input$time, .phase = .phase, .cond = .cond,
-    #              .participant = .participant)
-    #   })
-    # })
+    ## Plot Raw Data
 
     shiny::observeEvent(input$raw_plot_in, {
       shiny::req(uploaded_data(), input$outcome, input$time)
@@ -141,6 +140,20 @@ scdtb <- function(){
                  .time = input$time, .phase = reactive_phase(),
                  .cond = reactive_condition(), .participant = reactive_participant())
       })
+    })
+
+    ## Run Mixed Effects Analysis
+
+    shiny::observeEvent(input$mem, {
+      shiny::req(uploaded_data(), input$outcome, input$time, reactive_phase())
+
+      mem_res <- mixed_model_analysis(.df = uploaded_data(), .dv = input$outcome,
+                                      .time = input$time, .phase = reactive_phase(),
+                                      .participant = reactive_participant(),
+                                      rev_time_in_phase = FALSE, covs = reactive_covs())
+
+      output$mem_out <- shiny::renderPrint({ summary(mem_res$fitted_mod) })
+      output$mem_plot_out <- shiny::renderPlot({ mem_res$plot })
     })
 
   }
