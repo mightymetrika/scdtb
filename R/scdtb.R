@@ -18,7 +18,10 @@ scdtb <- function(){
         shiny::textInput("xout", "Additional Outcome Variable"),
         shiny::actionButton("raw_plot_in", "Plot Data"),
         shiny::textInput("cov", "Covariates"),
-        shiny::actionButton("mem", "Run Mixed Model")
+        shiny::actionButton("mem", "Run Mixed Model"),
+        shiny::numericInput("lagm", "Lag Max", 5),
+        shiny::numericInput("ci_value", "Confidence Interval", value = 0.95, min = 0, max = 1),
+        shiny::actionButton("clag", "Run Cross-Lagged")
         ),
       shiny::mainPanel(
         shiny::uiOutput("variables_title"),
@@ -26,6 +29,9 @@ scdtb <- function(){
         shiny::plotOutput("raw_plot_out"),
         shiny::verbatimTextOutput("mem_out"),
         shiny::plotOutput("mem_plot_out"),
+        shiny::verbatimTextOutput("cl_out"),
+        shiny::verbatimTextOutput("cl_ci_out"),
+        shiny::plotOutput("cl_plot_out")
         )
       )
   )
@@ -156,6 +162,19 @@ scdtb <- function(){
       output$mem_plot_out <- shiny::renderPlot({ mem_res$plot })
     })
 
+    ## Run Cross-Lagged Correlation Analysis
+
+    shiny::observeEvent(input$clag, {
+      shiny::req(uploaded_data(), input$outcome, input$xout)
+
+      cl_res <- cross_lagged(.df = uploaded_data(), .x = input$outcome,
+                             .y = input$xout, lag.max = input$lagm,
+                             na.action = stats::na.fail, conf.level = input$ci_value)
+
+      output$cl_out <- shiny::renderPrint({ print(cl_res) })
+      output$cl_ci_out <- shiny::renderPrint( {print(paste0("Confidence Intervals: [", cl_res$LCI, " , ", cl_res$UCI, "]"))})
+      output$cl_plot_out <- shiny::renderPlot({ plot(cl_res) })
+    })
   }
 
   shiny::shinyApp(ui = ui, server = server)
