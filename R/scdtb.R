@@ -21,7 +21,14 @@ scdtb <- function(){
         shiny::actionButton("mem", "Run Mixed Model"),
         shiny::numericInput("lagm", "Lag Max", 5),
         shiny::numericInput("ci_value", "Confidence Interval", value = 0.95, min = 0, max = 1),
-        shiny::actionButton("clag", "Run Cross-Lagged")
+        shiny::actionButton("clag", "Run Cross-Lagged"),
+        shiny::selectInput("naptype", "NAP Type",
+                           choices = c("reversability", "trend"),
+                           selected = "reversability"),
+        shiny::numericInput("lastm", "Last M", NA),
+        shiny::textInput("napphases", "NAP Phases"),
+        shiny::selectInput("imp", "Improvement", c("positive", "negative")),
+        shiny::actionButton("nap", "Run NAP")
         ),
       shiny::mainPanel(
         shiny::uiOutput("variables_title"),
@@ -31,7 +38,8 @@ scdtb <- function(){
         shiny::plotOutput("mem_plot_out"),
         shiny::verbatimTextOutput("cl_out"),
         shiny::verbatimTextOutput("cl_ci_out"),
-        shiny::plotOutput("cl_plot_out")
+        shiny::plotOutput("cl_plot_out"),
+        shiny::verbatimTextOutput("nap_out")
         )
       )
   )
@@ -59,6 +67,17 @@ scdtb <- function(){
 
     reactive_covs <- shiny::reactive({
       if (input$cov != "") { input$cov } else { NULL }
+    })
+
+    reactive_napphases <- shiny::reactive({
+      if (input$napphases != "") {
+        # Split the input string by commas and trim whitespace
+        trimws(strsplit(input$napphases, ",\\s*")[[1]])
+        } else { NULL }
+    })
+
+    reactive_lastm <- shiny::reactive({
+      if (!is.na(input$lastm)) { input$lastm } else { NULL }
     })
 
     ## Data Upload & Handle Data Types
@@ -175,6 +194,23 @@ scdtb <- function(){
       output$cl_ci_out <- shiny::renderPrint( {print(paste0("Confidence Intervals: [", cl_res$LCI, " , ", cl_res$UCI, "]"))})
       output$cl_plot_out <- shiny::renderPlot({ plot(cl_res) })
     })
+
+    ## Run NAP Analysis
+
+    shiny::observeEvent(input$nap, {
+      shiny::req(uploaded_data(), input$outcome, input$time, reactive_phase(),
+                 reactive_napphases())
+
+      output$nap_out <- shiny::renderPrint( {
+
+        nap(.df = uploaded_data(), .y = input$outcome, .phase = reactive_phase(),
+            .time = input$time, type = input$naptype, last_m = reactive_lastm(),
+            phases = reactive_napphases(), improvement = input$imp)
+
+      } )
+
+    })
+
   }
 
   shiny::shinyApp(ui = ui, server = server)
