@@ -12,55 +12,78 @@ scdtb <- function(){
                                     "text/comma-separated-values,text/plain",
                                     ".csv")),
         shiny::h3("Raw Data Plot"),
-        shiny::textInput("outcome", "Outcome Variable"),
-        shiny::textInput("time", "Time Variable"),
-        shiny::textInput("phase", "Phase Variable"),
-        shiny::textInput("condition", "Condition Variable"),
-        shiny::textInput("participant", "Participant Identifier"),
+        shiny::textInput("outcome", "Outcome Variable") |>
+          shiny::tags$div(title = "enter the name of the main outcome variable for the analysis"),
+        shiny::textInput("time", "Time Variable") |>
+          shiny::tags$div(title = "enter the name of the time variable"),
+        shiny::textInput("phase", "Phase Variable") |>
+          shiny::tags$div(title = "enter the name of the phase variable"),
+        shiny::textInput("condition", "Condition Variable") |>
+          shiny::tags$div(title = "enter the name of the treatment condition variable"),
+        shiny::textInput("participant", "Participant Identifier") |>
+          shiny::tags$div(title = "enter the name of the participant identifier"),
         shiny::actionButton("raw_plot_in", "Plot Data"),
         shiny::br(),  # Add a line break
         shiny::br(),  # Add a line break
         shiny::h3("Mixed Effect Model"),
-        shiny::textInput("cov", "Covariates"),
+        shiny::textInput("cov", "Covariates") |>
+          shiny::tags$div(title = "enter a comma separated list of covariates for the mixed effect model"),
         shiny::actionButton("mem", "Mixed Model Analysis"),
         shiny::br(),  # Add a line break
         shiny::br(),  # Add a line break
         shiny::h3("Cross-Lagged Correlation"),
-        shiny::textInput("xout", "Additional Outcome Variable"),
-        shiny::numericInput("lagm", "Lag Max", 5),
-        shiny::numericInput("ci_value", "Confidence Interval", value = 0.95, min = 0, max = 1),
+        shiny::textInput("xout", "Additional Outcome Variable") |>
+          shiny::tags$div(title = "name of the second variable in cross-lagged correlation analysis"),
+        shiny::numericInput("lagm", "Lag Max", 5) |>
+          shiny::tags$div(title = "maximum lag at which to calculate the cross-correlation"),
+        shiny::numericInput("ci_value", "Confidence Interval", value = 0.95, min = 0, max = 1) |>
+          shiny::tags$div(title = "confidence interval for cross-lagged correlation and randomization test"),
         shiny::actionButton("clag", "Run Cross-Lagged"),
         shiny::br(),  # Add a line break
         shiny::br(),  # Add a line break
         shiny::h3("Non-overlap of All Pairs"),
         shiny::selectInput("naptype", "NAP Type",
                            choices = c("reversability", "trend"),
-                           selected = "reversability"),
-        shiny::numericInput("lastm", "Last M", NA),
-        shiny::textInput("napphases", "NAP Phases"),
-        shiny::selectInput("imp", "Improvement", c("positive", "negative")),
+                           selected = "reversability") |>
+          shiny::tags$div(title = "type of analysis to be conducted"),
+        shiny::numericInput("lastm", "Last M", NA) |>
+          shiny::tags$div(title = "number of measurements from the end to be considered in a trend analysis. Leave as NULL if `NAP Type` is set to 'reversability'"),
+        shiny::textInput("napphases", "NAP Phases") |>
+          shiny::tags$div(title = "phases to be included in the analysis. If `NAP Type` is 'reversability', two phases (comma-separated) must be specified. If `NAP TYPE` is 'trend', one phase must be specified."),
+        shiny::selectInput("imp", "Improvement", c("positive", "negative")) |>
+          shiny::tags$div(title = "select the direction of improvement"),
         shiny::actionButton("nap", "Run NAP"),
         shiny::br(),  # Add a line break
         shiny::br(),  # Add a line break
         shiny::h3("Randomization Test"),
-        shiny::numericInput("perms", "Permutations", NA),
-        shiny::selectInput("cons", "Consecutive", c("observed", "fixed")),
-        shiny::numericInput("maxc", "Max Consec", NA),
-        shiny::numericInput("minc", "Min Consec", NA),
-        shiny::numericInput("bn", "Bins", 30),
+        shiny::numericInput("perms", "Permutations", NA) |>
+          shiny::tags$div(title = "number of permutations to perform. If `NULL`, all possible permutations are considered"),
+        shiny::selectInput("cons", "Consecutive", c("observed", "fixed")) |>
+          shiny::tags$div(title = "Specifies the constraint on consecutive sequences for permutation. Use `observed` for the observed sequence length or `fixed` for a specified sequence length. Defaults to `observed`"),
+        shiny::numericInput("maxc", "Max Consec", NA) |>
+          shiny::tags$div(title = "The maximum number of consecutive observations of the same condition to allow in permutations. If `NULL`, no maximum is enforced. To implement `Max Consec`, `Consecutive` must be set to `fixed`."),
+        shiny::numericInput("minc", "Min Consec", NA) |>
+          shiny::tags$div(title = "The minimum number of consecutive observations of the same condition to allow in permutations. If `NULL`, no minimum is enforced. To implement `Min Consec`, `Consecutive` must be set to `fixed`."),
+        shiny::numericInput("bn", "Bins", 30) |>
+          shiny::tags$div(title = "number of bins to use for the histogram of the test statistic distribution."),
         shiny::actionButton("rtest", "Run Randomization Test"),
         shiny::br()  # Add a line break
         ),
       shiny::mainPanel(
         shiny::uiOutput("variables_title"),
         DT::dataTableOutput("variables_table"),
+        shiny::uiOutput("raw_plot_title"),
         shiny::plotOutput("raw_plot_out"),
+        shiny::uiOutput("mem_title"),
         shiny::verbatimTextOutput("mem_out"),
         shiny::plotOutput("mem_plot_out"),
+        shiny::uiOutput("cl_title"),
         shiny::verbatimTextOutput("cl_out"),
         shiny::verbatimTextOutput("cl_ci_out"),
         shiny::plotOutput("cl_plot_out"),
+        shiny::uiOutput("nap_title"),
         shiny::verbatimTextOutput("nap_out"),
+        shiny::uiOutput("rtest_title"),
         shiny::verbatimTextOutput("rtest_diff_out"),
         shiny::verbatimTextOutput("rtest_pval_out"),
         shiny::plotOutput("rtest_plot_out"),
@@ -197,6 +220,8 @@ scdtb <- function(){
     shiny::observeEvent(input$raw_plot_in, {
       shiny::req(uploaded_data(), input$outcome, input$time)
 
+      output$raw_plot_title <- shiny::renderUI({ shiny::tags$h2("Raw Data Plot") })
+
       output$raw_plot_out <- shiny::renderPlot({
         raw_plot(.df = uploaded_data(), .out = input$outcome,
                  .time = input$time, .phase = reactive_phase(),
@@ -208,6 +233,8 @@ scdtb <- function(){
 
     shiny::observeEvent(input$mem, {
       shiny::req(uploaded_data(), input$outcome, input$time, reactive_phase())
+
+      output$mem_title <- shiny::renderUI({ shiny::tags$h2("Mixed Effects Analysis") })
 
       mem_res <- mixed_model_analysis(.df = uploaded_data(), .dv = input$outcome,
                                       .time = input$time, .phase = reactive_phase(),
@@ -227,6 +254,7 @@ scdtb <- function(){
                              .y = input$xout, lag.max = input$lagm,
                              na.action = stats::na.fail, conf.level = input$ci_value)
 
+      output$cl_title <- shiny::renderUI({ shiny::tags$h2("Cross-Lagged Correlation Analysis") })
       output$cl_out <- shiny::renderPrint({ print(cl_res) })
       output$cl_ci_out <- shiny::renderPrint( {print(paste0("Confidence Intervals: [", cl_res$LCI, " , ", cl_res$UCI, "]"))})
       output$cl_plot_out <- shiny::renderPlot({ plot(cl_res) })
@@ -238,6 +266,7 @@ scdtb <- function(){
       shiny::req(uploaded_data(), input$outcome, input$time, reactive_phase(),
                  reactive_napphases())
 
+      output$nap_title <- shiny::renderUI({ shiny::tags$h2("Non-overlap of All Pairs Analysis") })
       output$nap_out <- shiny::renderPrint( {
 
         nap(.df = uploaded_data(), .y = input$outcome, .phase = reactive_phase(),
@@ -259,6 +288,7 @@ scdtb <- function(){
                                      max_consec = reactive_maxc(), min_consec = reactive_minc(),
                                      conf.level = input$ci_value, .bins = input$bn)
 
+      output$rtest_title <- shiny::renderUI({ shiny::tags$h2("Randomization Test Analysis") })
       output$rtest_diff_out <- shiny::renderPrint( {paste0("Original Mean Difference: ", rand_res$original_diff)} )
       output$rtest_pval_out <- shiny::renderPrint( {paste0("p-value: ", rand_res$p_value)} )
       output$rtest_plot_out <- shiny::renderPlot({ rand_res$dist_plot })
