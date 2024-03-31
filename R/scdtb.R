@@ -2,6 +2,7 @@ scdtb <- function(){
 
   # UI
   ui <- shiny::fluidPage(
+    theme = shinythemes::shinytheme("lumen"),
     shiny::titlePanel("Set Up SCD Analysis"),
     shiny::sidebarLayout(
       shiny::sidebarPanel(
@@ -10,25 +11,45 @@ scdtb <- function(){
                          accept = c("text/csv",
                                     "text/comma-separated-values,text/plain",
                                     ".csv")),
+        shiny::h3("Raw Data Plot"),
         shiny::textInput("outcome", "Outcome Variable"),
         shiny::textInput("time", "Time Variable"),
         shiny::textInput("phase", "Phase Variable"),
         shiny::textInput("condition", "Condition Variable"),
         shiny::textInput("participant", "Participant Identifier"),
-        shiny::textInput("xout", "Additional Outcome Variable"),
         shiny::actionButton("raw_plot_in", "Plot Data"),
+        shiny::br(),  # Add a line break
+        shiny::br(),  # Add a line break
+        shiny::h3("Mixed Effect Model"),
         shiny::textInput("cov", "Covariates"),
-        shiny::actionButton("mem", "Run Mixed Model"),
+        shiny::actionButton("mem", "Mixed Model Analysis"),
+        shiny::br(),  # Add a line break
+        shiny::br(),  # Add a line break
+        shiny::h3("Cross-Lagged Correlation"),
+        shiny::textInput("xout", "Additional Outcome Variable"),
         shiny::numericInput("lagm", "Lag Max", 5),
         shiny::numericInput("ci_value", "Confidence Interval", value = 0.95, min = 0, max = 1),
         shiny::actionButton("clag", "Run Cross-Lagged"),
+        shiny::br(),  # Add a line break
+        shiny::br(),  # Add a line break
+        shiny::h3("Non-overlap of All Pairs"),
         shiny::selectInput("naptype", "NAP Type",
                            choices = c("reversability", "trend"),
                            selected = "reversability"),
         shiny::numericInput("lastm", "Last M", NA),
         shiny::textInput("napphases", "NAP Phases"),
         shiny::selectInput("imp", "Improvement", c("positive", "negative")),
-        shiny::actionButton("nap", "Run NAP")
+        shiny::actionButton("nap", "Run NAP"),
+        shiny::br(),  # Add a line break
+        shiny::br(),  # Add a line break
+        shiny::h3("Randomization Test"),
+        shiny::numericInput("perms", "Permutations", NA),
+        shiny::selectInput("cons", "Consecutive", c("observed", "fixed")),
+        shiny::numericInput("maxc", "Max Consec", NA),
+        shiny::numericInput("minc", "Min Consec", NA),
+        shiny::numericInput("bn", "Bins", 30),
+        shiny::actionButton("rtest", "Run Randomization Test"),
+        shiny::br()  # Add a line break
         ),
       shiny::mainPanel(
         shiny::uiOutput("variables_title"),
@@ -39,7 +60,11 @@ scdtb <- function(){
         shiny::verbatimTextOutput("cl_out"),
         shiny::verbatimTextOutput("cl_ci_out"),
         shiny::plotOutput("cl_plot_out"),
-        shiny::verbatimTextOutput("nap_out")
+        shiny::verbatimTextOutput("nap_out"),
+        shiny::verbatimTextOutput("rtest_diff_out"),
+        shiny::verbatimTextOutput("rtest_pval_out"),
+        shiny::plotOutput("rtest_plot_out"),
+        shiny::verbatimTextOutput("rtest_ci_out")
         )
       )
   )
@@ -78,6 +103,18 @@ scdtb <- function(){
 
     reactive_lastm <- shiny::reactive({
       if (!is.na(input$lastm)) { input$lastm } else { NULL }
+    })
+
+    reactive_perms <- shiny::reactive({
+      if (!is.na(input$perms)) { input$perms } else { NULL }
+    })
+
+    reactive_maxc <- shiny::reactive({
+      if (!is.na(input$maxc)) { input$maxc } else { NULL }
+    })
+
+    reactive_minc <- shiny::reactive({
+      if (!is.na(input$minc)) { input$minc } else { NULL }
     })
 
     ## Data Upload & Handle Data Types
@@ -208,6 +245,25 @@ scdtb <- function(){
             phases = reactive_napphases(), improvement = input$imp)
 
       } )
+
+    })
+
+    ## Run Randomization Test
+
+    shiny::observeEvent(input$rtest, {
+      shiny::req(uploaded_data(), input$outcome, reactive_condition(), input$time)
+
+      rand_res <- randomization_test(.df = uploaded_data(), .out = input$outcome,
+                                     .cond = reactive_condition(), .time = input$time,
+                                     num_permutations = reactive_perms(), consec = input$cons,
+                                     max_consec = reactive_maxc(), min_consec = reactive_minc(),
+                                     conf.level = input$ci_value, .bins = input$bn)
+
+      output$rtest_diff_out <- shiny::renderPrint( {paste0("Original Mean Difference: ", rand_res$original_diff)} )
+      output$rtest_pval_out <- shiny::renderPrint( {paste0("p-value: ", rand_res$p_value)} )
+      output$rtest_plot_out <- shiny::renderPlot({ rand_res$dist_plot })
+      output$rtest_ci_out <- shiny::renderPrint( { rand_res$conf_int } )
+
 
     })
 
