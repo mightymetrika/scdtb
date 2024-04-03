@@ -30,3 +30,33 @@ render_card_grid <- function(new_card_grid) {
   })
   return(card_ui)
 }
+
+swapper <- function(cards_matrix, swap_in_row = NULL) {
+
+  # Initialize move history
+  if (!inherits(cards_matrix, "swapper")) {
+    attr(cards_matrix, "swap_in_row_hist") <- 0
+  }
+
+  # Swap within row
+  if (!is.null(swap_in_row) && length(swap_in_row) == 2) {
+    col1 <- swap_in_row[1]
+    col2 <- swap_in_row[2]
+
+    if (attr(cards_matrix, "swap_in_row_hist") >= 1) {
+      stop("You can't swap within phase more than once.")
+    }
+
+    temp <- cards_matrix[1, col1]
+    cards_matrix[1, col1] <- cards_matrix[1, col2]
+    cards_matrix[1, col2] <- temp
+
+    attr(cards_matrix, "swap_in_row_hist") <- attr(cards_matrix, "swap_in_row1_hist") + 1
+
+  }
+
+  # Update the class
+  class(cards_matrix) <- c("swapper", class(cards_matrix))
+
+  return(cards_matrix)
+}
