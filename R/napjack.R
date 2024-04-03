@@ -13,7 +13,11 @@ napjack <- function(){
       ),
 
       shiny::mainPanel(
-        shiny::uiOutput("card_display"),
+        shiny::uiOutput("card_display_1"),
+        shiny::uiOutput("card_display_2"),
+        shiny::uiOutput("card_display_3"),
+        shiny::uiOutput("card_display_4"),
+        shiny::uiOutput("swap_controls_ui"),
       )
     )
   )
@@ -25,6 +29,8 @@ napjack <- function(){
     score_game_rv <- shiny::reactiveVal(NULL)
     game_deck <- shiny::reactiveVal(NULL)
     dealt_cards <- shiny::reactiveVal(NULL)
+    phase_matrix <- shiny::reactiveVal(NULL)
+    phase_open <- shiny::reactiveVal(FALSE)
 
     shiny::observeEvent(input$deal_phase, {
 
@@ -33,6 +39,7 @@ napjack <- function(){
 
       # Get game deck
       if (deal_phase_rv() == 0){
+
         original_deck <- mmcards::i_deck(deck = mmcards::shuffle_deck(),
                         i_path = "www",
                         i_names = c("2_of_clubs", "2_of_diamonds", "2_of_hearts", "2_of_spades",
@@ -57,6 +64,9 @@ napjack <- function(){
       # Deal cards
       card_grid <- deal_phase(game_deck())
 
+      # Update phase matrix
+      phase_matrix(card_grid$cards_matrix)
+
       # Update deal phase
       deal_phase_rv(deal_phase_rv() + 1)
 
@@ -74,55 +84,113 @@ napjack <- function(){
         dealts <<- rbind(dealts, .df)
       })
 
-      # Rendering the UI for the card grid
-      output$card_display <- shiny::renderUI({
-        render_card_grid(card_grid$cards_matrix)
-      })
+      # Rendering the UI for the card grid based on the phase
+      if (deal_phase_rv() == 1){
+        phase_matrix1 <- phase_matrix()
+        output$card_display_1 <- shiny::renderUI({
+          render_card_grid(phase_matrix1)
+        })
+      }
+
+      if (deal_phase_rv() == 2){
+        output$card_display_2 <- shiny::renderUI({
+          phase_matrix2 <- phase_matrix()
+          render_card_grid(phase_matrix2)
+        })
+      }
+
+      if (deal_phase_rv() == 3){
+        output$card_display_3 <- shiny::renderUI({
+          phase_matrix3 <- phase_matrix()
+          render_card_grid(phase_matrix3)
+        })
+
+      }
+
+      if (deal_phase_rv() == 4){
+        output$card_display_4 <- shiny::renderUI({
+          phase_matrix4 <- phase_matrix()
+          render_card_grid(phase_matrix4)
+        })
+      }
 
       #Update deck
       game_deck(card_grid$updeck)
 
+      # Update phase open
+      phase_open(TRUE)
+
     })
 
-    # shiny::observeEvent(input$swap_inside_row, {
-    #   # Extract the replication card grid from the reactive value
-    #   rep_cards <- replication_cards()
-    #
-    #   # Check for NULL values in user input and exit early if found
-    #   if (is.null(input$swap_in_row_num) || is.null(input$swap_in_row_col1) || is.null(input$swap_in_row_col2)) return(NULL)
-    #
-    #   # Swap within the row using the swapper function
-    #   tryCatch({
-    #     new_card_grid <- swapper(rep_cards, swap_in_row = c(input$swap_in_row_num, input$swap_in_row_col1, input$swap_in_row_col2))
-    #
-    #     # Update the reactive value to hold the new card grid
-    #     replication_cards(new_card_grid)
-    #
-    #     # Rerender the UI for the card grid
-    #     output$rep_card_display <- shiny::renderUI({
-    #       render_card_grid(new_card_grid)
-    #     })
-    #   }, error = function(e) {
-    #     # Handle the error by displaying a message
-    #     shiny::showNotification(paste("An error occurred:", e$message), type = "error")
-    #   })
-    # })
-    # # Render the swap controls only when the replication study has been conducted
-    # output$swap_controls_ui <- shiny::renderUI({
-    #   if (replication_conducted()) {
-    #     shiny::fluidRow(
-    #       # Third column: Swap Inside Row
-    #       shiny::column(4,
-    #                     shiny::tagList(
-    #                       shiny::numericInput("swap_in_row_num", "Row Number", value = NULL),
-    #                       shiny::numericInput("swap_in_row_col1", "Swap Row Column 1", value = NULL),
-    #                       shiny::numericInput("swap_in_row_col2", "Swap Row Column 2", value = NULL),
-    #                       shiny::actionButton("swap_inside_row", "Execute Inside Row Swap")
-    #                     )
-    #       )
-    #     )
-    #   }
-    # })
+    shiny::observeEvent(input$swap_inside_row, {
+      # Extract the replication card grid from the reactive value
+      card_matrix <- phase_matrix()
+
+      # Check for NULL values in user input and exit early if found
+      if (is.null(input$swap_in_row_col1) || is.null(input$swap_in_row_col2)) return(NULL)
+
+      # Swap within the row using the swapper function
+      tryCatch({
+        new_card_grid <- swapper(card_matrix, swap_in_row = c(input$swap_in_row_col1, input$swap_in_row_col2))
+
+        print(new_card_grid)
+
+        # Update the reactive value to hold the new card grid
+        phase_matrix(new_card_grid)
+
+        # Rerender the UI for the card grid based on the phase
+        if (deal_phase_rv() == 1){
+          phase_matrix1 <- phase_matrix()
+          output$card_display_1 <- shiny::renderUI({
+            render_card_grid(phase_matrix1)
+          })
+        }
+
+        if (deal_phase_rv() == 2){
+          output$card_display_2 <- shiny::renderUI({
+            phase_matrix2 <- phase_matrix()
+            render_card_grid(phase_matrix2)
+          })
+        }
+
+        if (deal_phase_rv() == 3){
+          output$card_display_3 <- shiny::renderUI({
+            phase_matrix3 <- phase_matrix()
+            render_card_grid(phase_matrix3)
+          })
+
+        }
+
+        if (deal_phase_rv() == 4){
+          output$card_display_4 <- shiny::renderUI({
+            phase_matrix4 <- phase_matrix()
+            render_card_grid(phase_matrix4)
+          })
+        }
+      }, error = function(e) {
+        # Handle the error by displaying a message
+        shiny::showNotification(paste("An error occurred:", e$message), type = "error")
+      })
+
+      phase_open(FALSE)
+    })
+
+    # Render the swap controls only when the replication study has been conducted
+    output$swap_controls_ui <- shiny::renderUI({
+      if (phase_open()) {
+        shiny::fluidRow(
+          shiny::column(4,
+                        shiny::numericInput("swap_in_row_col1", "Swap Column:", value = NULL)
+                        ),
+          shiny::column(4,
+                        shiny::numericInput("swap_in_row_col2", "with Column:", value = NULL)
+                        ),
+          shiny::column(4,
+                        shiny::actionButton("swap_inside_row", "Execute Inside Row Swap"))
+
+        )
+      }
+    })
 
   }
 
