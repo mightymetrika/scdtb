@@ -18,6 +18,12 @@ napjack <- function(){
         shiny::uiOutput("card_display_3"),
         shiny::uiOutput("card_display_4"),
         shiny::uiOutput("swap_controls_ui"),
+        shiny::uiOutput("raw_plot_title"),
+        shiny::plotOutput("raw_plot_out"),
+        shiny::uiOutput("nap_title1"),
+        shiny::verbatimTextOutput("nap_out1"),
+        shiny::uiOutput("nap_title2"),
+        shiny::verbatimTextOutput("nap_out2")
       )
     )
   )
@@ -31,11 +37,16 @@ napjack <- function(){
     dealt_cards <- shiny::reactiveVal(NULL)
     phase_matrix <- shiny::reactiveVal(NULL)
     phase_open <- shiny::reactiveVal(FALSE)
+    game_hand <- shiny::reactiveVal(NULL)
+    game_table <- shiny::reactiveVal(NULL)
 
     shiny::observeEvent(input$deal_phase, {
 
       # Reset reactive values
       score_game_rv(NULL)
+
+      # limit number of phases within game
+      shiny::req(deal_phase_rv() < 4)
 
       # Get game deck
       if (deal_phase_rv() == 0){
@@ -84,6 +95,12 @@ napjack <- function(){
         dealts <<- rbind(dealts, .df)
       })
 
+      game_hand(dealts)
+
+      game_table(rbind(game_table(), game_hand()))
+      print(game_table())
+      print(game_hand())
+
       # Rendering the UI for the card grid based on the phase
       if (deal_phase_rv() == 1){
         phase_matrix1 <- phase_matrix()
@@ -93,23 +110,23 @@ napjack <- function(){
       }
 
       if (deal_phase_rv() == 2){
+        phase_matrix2 <- phase_matrix()
         output$card_display_2 <- shiny::renderUI({
-          phase_matrix2 <- phase_matrix()
           render_card_grid(phase_matrix2)
         })
       }
 
       if (deal_phase_rv() == 3){
+        phase_matrix3 <- phase_matrix()
         output$card_display_3 <- shiny::renderUI({
-          phase_matrix3 <- phase_matrix()
           render_card_grid(phase_matrix3)
         })
 
       }
 
       if (deal_phase_rv() == 4){
+        phase_matrix4 <- phase_matrix()
         output$card_display_4 <- shiny::renderUI({
-          phase_matrix4 <- phase_matrix()
           render_card_grid(phase_matrix4)
         })
       }
@@ -123,6 +140,9 @@ napjack <- function(){
     })
 
     shiny::observeEvent(input$swap_inside_row, {
+
+      shiny::req(phase_open())
+
       # Extract the replication card grid from the reactive value
       card_matrix <- phase_matrix()
 
@@ -132,8 +152,6 @@ napjack <- function(){
       # Swap within the row using the swapper function
       tryCatch({
         new_card_grid <- swapper(card_matrix, swap_in_row = c(input$swap_in_row_col1, input$swap_in_row_col2))
-
-        print(new_card_grid)
 
         # Update the reactive value to hold the new card grid
         phase_matrix(new_card_grid)
@@ -147,23 +165,23 @@ napjack <- function(){
         }
 
         if (deal_phase_rv() == 2){
+          phase_matrix2 <- phase_matrix()
           output$card_display_2 <- shiny::renderUI({
-            phase_matrix2 <- phase_matrix()
             render_card_grid(phase_matrix2)
           })
         }
 
         if (deal_phase_rv() == 3){
+          phase_matrix3 <- phase_matrix()
           output$card_display_3 <- shiny::renderUI({
-            phase_matrix3 <- phase_matrix()
             render_card_grid(phase_matrix3)
           })
 
         }
 
         if (deal_phase_rv() == 4){
+          phase_matrix4 <- phase_matrix()
           output$card_display_4 <- shiny::renderUI({
-            phase_matrix4 <- phase_matrix()
             render_card_grid(phase_matrix4)
           })
         }
@@ -171,6 +189,26 @@ napjack <- function(){
         # Handle the error by displaying a message
         shiny::showNotification(paste("An error occurred:", e$message), type = "error")
       })
+
+      # Return a data frame of dealt cards
+      dealts <- data.frame(card = character(),
+                           rank = character(),
+                           suit = character(),
+                           value = numeric(),
+                           icard = character(),
+                           phase = numeric())
+
+      lapply(1:6, function(x){
+        .df <- as.data.frame(new_card_grid[[x]])
+        .df$phase <- deal_phase_rv()
+        dealts <<- rbind(dealts, .df)
+      })
+
+      game_hand(dealts)
+      game_table(rbind(utils::head(game_table(), -6), game_hand()))
+
+      print(game_table())
+      print(game_hand())
 
       phase_open(FALSE)
     })
@@ -192,7 +230,65 @@ napjack <- function(){
       }
     })
 
+    shiny::observeEvent(input$score_game, {
+
+      shiny::req(deal_phase_rv() == 4)
+
+      final_game_table <- game_table()
+
+      final_game_table$phase <- factor(final_game_table$phase,
+                                       levels = c(1, 2, 3, 4),
+                                       labels = c("baseline 1", "treatment 1",
+                                                  "baseline 2", "treatment 2"))
+
+      final_game_table$time <- 1:nrow(final_game_table)
+
+      # ## Plot Raw Data
+      #
+      #
+      #   output$raw_plot_title <- shiny::renderUI({ shiny::tags$h2("Raw Data Plot") })
+      #
+      #   output$raw_plot_out <- shiny::renderPlot({
+      #     raw_plot(.df = final_game_table, .out = "value",
+      #              .time = "time", .phase = "phase",
+      #              phase_levels = c("baseline 1", "treatment 1",
+      #                               "baseline 2", "treatment 2"))
+      #   })
+
+      # Run NAP Analysis
+
+
+        output$nap_title1 <- shiny::renderUI({ shiny::tags$h2("NAP Baseline 1") })
+        output$nap_out1 <- shiny::renderPrint( {
+
+          nap(.df = final_game_table, .y = "value", .phase = "phase",
+              .time = "time", type = "trend", last_m = 3,
+              phases = list("baseline 1"), improvement = "positive")
+        } )
+
+        output$nap_title2 <- shiny::renderUI({ shiny::tags$h2("NAP Baseline 2") })
+        output$nap_out2 <- shiny::renderPrint( {
+
+          nap(.df = final_game_table, .y = "value", .phase = "phase",
+              .time = "time", type = "trend", last_m = 3,
+              phases = list("baseline 2"), improvement = "positive")
+        } )
+
+
+
+      print(final_game_table)
+      print(class(final_game_table))
+
+
+
+
+    })
+
   }
+
+
+
+
 
   shiny::shinyApp(ui, server)
 }
