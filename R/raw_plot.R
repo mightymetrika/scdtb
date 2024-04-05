@@ -114,10 +114,10 @@ raw_plot <- function(.df, .out, .time, .phase = NULL, .cond = NULL,
 
         # Create midpoint annotation data frame
         data.frame(
-          label = levels(factor(participant_data[[.phase]])),
+          label = levels(factor(participant_data[[.phase]]))[diff(as.numeric(factor(participant_data[[.phase]]))) != 0],
           x = .pc$midpoints + .pc$offset,
-          y = rep(max(participant_data[[.out]]) * 1.05, length(.pc$start_points)), # Adjust Y position as needed
-          .participant = unique(participant_data[[.participant]])
+          y = rep(max(participant_data[[.out]]) * 1.05, length(.pc$midpoints)), # Adjust Y position as needed
+          .participant = rep(unique(participant_data[[.participant]]), length(.pc$midpoints))
         )
       })
 
@@ -164,19 +164,39 @@ raw_plot <- function(.df, .out, .time, .phase = NULL, .cond = NULL,
       # Process phase change data
       .pc <- process_phase_change(.df)
 
+      # # Create midpoint annotation data frame
+      # annotations_df <- data.frame(
+      #   label = levels(factor(.df[[.phase]])),
+      #   x = .pc$midpoints + .pc$offset,
+      #   y = rep(max(.df[[.out]]) * 1.05, length(.pc$start_points))
+      #   )
+      #
+      #
+      # # Create phase labels data frame
+      # labels_df <- data.frame(
+      #   label = levels(factor(.df[[.phase]])),
+      #   x = (.pc$start_points + .pc$end_points) / 2,
+      #   y = rep(out_max + label_raise*out_offset, length(.pc$start_points)) # Adjust Y position as needed
+      #   )
+
       # Create midpoint annotation data frame
       annotations_df <- data.frame(
-        label = levels(factor(.df[[.phase]])),
+        label = levels(factor(.df[[.phase]]))[diff(as.numeric(factor(.df[[.phase]]))) != 0],
         x = .pc$midpoints + .pc$offset,
-        y = rep(max(.df[[.out]]) * 1.05, length(.pc$start_points))
-        )
+        y = rep(max(.df[[.out]]) * 1.05, length(.pc$midpoints))
+      )
 
       # Create phase labels data frame
+      unique_phases <- unique(factor(.df[[.phase]]))
+      if (is.null(phase_labels) || length(phase_labels) != length(unique_phases)) {
+        phase_labels <- as.character(unique_phases)
+      }
+
       labels_df <- data.frame(
-        label = levels(factor(.df[[.phase]])),
+        label = phase_labels,
         x = (.pc$start_points + .pc$end_points) / 2,
         y = rep(out_max + label_raise*out_offset, length(.pc$start_points)) # Adjust Y position as needed
-        )
+      )
 
       # Add phases and styling to plot
       rawPlot <- rawPlot +

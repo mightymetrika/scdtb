@@ -23,7 +23,12 @@ napjack <- function(){
         shiny::uiOutput("nap_title1"),
         shiny::verbatimTextOutput("nap_out1"),
         shiny::uiOutput("nap_title2"),
-        shiny::verbatimTextOutput("nap_out2")
+        shiny::verbatimTextOutput("nap_out2"),
+        shiny::uiOutput("nap_titlerev"),
+        shiny::verbatimTextOutput("nap_outrev"),
+        shiny::uiOutput("mem_title"),
+        shiny::verbatimTextOutput("mem_out"),
+        shiny::plotOutput("mem_plot_out")
       )
     )
   )
@@ -230,6 +235,7 @@ napjack <- function(){
       }
     })
 
+    # Score Game
     shiny::observeEvent(input$score_game, {
 
       shiny::req(deal_phase_rv() == 4)
@@ -243,52 +249,54 @@ napjack <- function(){
 
       final_game_table$time <- 1:nrow(final_game_table)
 
-      # ## Plot Raw Data
-      #
-      #
-      #   output$raw_plot_title <- shiny::renderUI({ shiny::tags$h2("Raw Data Plot") })
-      #
-      #   output$raw_plot_out <- shiny::renderPlot({
-      #     raw_plot(.df = final_game_table, .out = "value",
-      #              .time = "time", .phase = "phase",
-      #              phase_levels = c("baseline 1", "treatment 1",
-      #                               "baseline 2", "treatment 2"))
-      #   })
+      # Plot Raw Data
+
+      output$raw_plot_title <- shiny::renderUI({ shiny::tags$h2("Raw Data Plot") })
+
+      output$raw_plot_out <- shiny::renderPlot({
+        raw_plot(.df = final_game_table, .out = "value",
+                 .time = "time", .phase = "phase",
+                 phase_levels = c("baseline 1", "treatment 1",
+                                  "baseline 2", "treatment 2"))
+        })
 
       # Run NAP Analysis
 
+      output$nap_title1 <- shiny::renderUI({ shiny::tags$h2("NAP Baseline 1") })
 
-        output$nap_title1 <- shiny::renderUI({ shiny::tags$h2("NAP Baseline 1") })
-        output$nap_out1 <- shiny::renderPrint( {
-
+      output$nap_out1 <- shiny::renderPrint( {
           nap(.df = final_game_table, .y = "value", .phase = "phase",
               .time = "time", type = "trend", last_m = 3,
               phases = list("baseline 1"), improvement = "positive")
         } )
 
-        output$nap_title2 <- shiny::renderUI({ shiny::tags$h2("NAP Baseline 2") })
-        output$nap_out2 <- shiny::renderPrint( {
-
-          nap(.df = final_game_table, .y = "value", .phase = "phase",
-              .time = "time", type = "trend", last_m = 3,
-              phases = list("baseline 2"), improvement = "positive")
+      output$nap_title2 <- shiny::renderUI({ shiny::tags$h2("NAP Baseline 2") })
+      output$nap_out2 <- shiny::renderPrint( {
+        nap(.df = final_game_table, .y = "value", .phase = "phase",
+            .time = "time", type = "trend", last_m = 3,
+            phases = list("baseline 2"), improvement = "positive")
         } )
 
+      output$nap_titlerev <- shiny::renderUI({ shiny::tags$h2("NAP Reversability") })
+      output$nap_outrev <- shiny::renderPrint( {
+          nap(.df = final_game_table, .y = "value", .phase = "phase",
+              .time = "time", type = "reversability",
+              phases = list("baseline 1", "baseline 2"), improvement = "positive")
+        } )
 
+      # Run Mixed Effects Analysis
 
-      print(final_game_table)
-      print(class(final_game_table))
+      mem_res <- mixed_model_analysis(.df = final_game_table, .dv = "value",
+                                      .time = "time", .phase = "phase",
+                                      rev_time_in_phase = FALSE)
 
-
-
+      output$mem_title <- shiny::renderUI({ shiny::tags$h2("Mixed Effects Analysis") })
+      output$mem_out <- shiny::renderPrint({ summary(mem_res$fitted_mod) })
+      output$mem_plot_out <- shiny::renderPlot({ mem_res$plot })
 
     })
 
   }
-
-
-
-
 
   shiny::shinyApp(ui, server)
 }
