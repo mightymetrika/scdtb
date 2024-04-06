@@ -3,21 +3,18 @@ napjack <- function(){
     theme = shinythemes::shinytheme("paper"),
     shiny::titlePanel("Nap Jack"),
 
-    shiny::sidebarLayout(
-      shiny::sidebarPanel(
-        # Original study
-        shiny::fluidRow(
-          shiny::column(12, shiny::actionButton("deal_phase", "Deal Phase")),
-        ),
-        shiny::actionButton("score_game", "Score Game")
-      ),
-
       shiny::mainPanel(
         shiny::uiOutput("card_display_1"),
         shiny::uiOutput("card_display_2"),
         shiny::uiOutput("card_display_3"),
         shiny::uiOutput("card_display_4"),
         shiny::uiOutput("swap_controls_ui"),
+         shiny::fluidRow(
+           shiny::column(12, shiny::actionButton("deal_phase", "Deal Phase")),
+           shiny::br(),  # Add a line break
+           shiny::br(),  # Add a line break
+           shiny::column(12, shiny::actionButton("score_game", "Score Game"))
+         ),
         shiny::uiOutput("raw_plot_title"),
         shiny::plotOutput("raw_plot_out"),
         shiny::uiOutput("nap_title1"),
@@ -27,10 +24,11 @@ napjack <- function(){
         shiny::uiOutput("nap_titlerev"),
         shiny::verbatimTextOutput("nap_outrev"),
         shiny::uiOutput("mem_title"),
-        shiny::verbatimTextOutput("mem_out"),
-        shiny::plotOutput("mem_plot_out")
+        shiny::uiOutput("mem_level_title"),
+        shiny::plotOutput("mem_plot_out"),
+        shiny::verbatimTextOutput("mem_sum"),
+        shiny::verbatimTextOutput("mem_out")
       )
-    )
   )
 
   server <- function(input, output, session) {
@@ -288,14 +286,29 @@ napjack <- function(){
 
       mem_res <- mixed_model_analysis(.df = final_game_table, .dv = "value",
                                       .time = "time", .phase = "phase",
-                                      rev_time_in_phase = FALSE)
+                                      rev_time_in_phase = TRUE)
+
+      final_game_table$phase <- stats::relevel(final_game_table$phase, "baseline 2")
+
+      mem_res2 <- mixed_model_analysis(.df = final_game_table, .dv = "value",
+                                      .time = "time", .phase = "phase",
+                                      rev_time_in_phase = TRUE)
+
+      tidy_b1 <- broom.mixed::tidy(mem_res$fitted_mod, conf.int = TRUE)
+      tidy_b1 <- tidy_b1[tidy_b1$term == "phasetreatment 1", ]
+      tidy_b1$ref <- "baseline 1"
+
+      tidy_b2 <- broom.mixed::tidy(mem_res2$fitted_mod, conf.int = TRUE)
+      tidy_b2 <- tidy_b2[tidy_b2$term %in% c("phasetreatment 1", "phasetreatment 2"), ]
+      tidy_b2$ref <- "baseline 2"
+
+      tidy_all <- rbind(tidy_b1, tidy_b2)
 
       output$mem_title <- shiny::renderUI({ shiny::tags$h2("Mixed Effects Analysis") })
-      output$mem_out <- shiny::renderPrint({ summary(mem_res$fitted_mod) })
+      output$mem_sum <- shiny::renderPrint({tidy_all})
       output$mem_plot_out <- shiny::renderPlot({ mem_res$plot })
-
+      output$mem_out <- shiny::renderPrint({ summary(mem_res$fitted_mod) })
     })
-
   }
 
   shiny::shinyApp(ui, server)
