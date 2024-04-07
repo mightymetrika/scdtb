@@ -15,6 +15,7 @@ napjack <- function(){
            shiny::br(),  # Add a line break
            shiny::column(12, shiny::actionButton("score_game", "Score Game"))
          ),
+        shiny::uiOutput("interpretation"),
         shiny::uiOutput("raw_plot_title"),
         shiny::plotOutput("raw_plot_out"),
         shiny::uiOutput("nap_title1"),
@@ -42,6 +43,7 @@ napjack <- function(){
     phase_open <- shiny::reactiveVal(FALSE)
     game_hand <- shiny::reactiveVal(NULL)
     game_table <- shiny::reactiveVal(NULL)
+    point_total <- shiny::reactiveVal(0)
 
     shiny::observeEvent(input$deal_phase, {
 
@@ -260,27 +262,38 @@ napjack <- function(){
 
       # Run NAP Analysis
 
+      # nap baseline 1
       output$nap_title1 <- shiny::renderUI({ shiny::tags$h2("NAP Baseline 1") })
 
-      output$nap_out1 <- shiny::renderPrint( {
-          nap(.df = final_game_table, .y = "value", .phase = "phase",
-              .time = "time", type = "trend", last_m = 3,
-              phases = list("baseline 1"), improvement = "positive")
-        } )
+      napo1 <- nap(.df = final_game_table, .y = "value", .phase = "phase",
+                   .time = "time", type = "trend", last_m = 3,
+                   phases = list("baseline 1"), improvement = "positive")
 
+      output$nap_out1 <- shiny::renderPrint( { napo1 } )
+
+      if (napo1 <= 0.85){ point_total(point_total() + 1) }
+
+      # nap baseline 2
       output$nap_title2 <- shiny::renderUI({ shiny::tags$h2("NAP Baseline 2") })
-      output$nap_out2 <- shiny::renderPrint( {
-        nap(.df = final_game_table, .y = "value", .phase = "phase",
-            .time = "time", type = "trend", last_m = 3,
-            phases = list("baseline 2"), improvement = "positive")
-        } )
 
+      napo2 <- nap(.df = final_game_table, .y = "value", .phase = "phase",
+          .time = "time", type = "trend", last_m = 3,
+          phases = list("baseline 2"), improvement = "positive")
+
+      output$nap_out2 <- shiny::renderPrint( { napo2 } )
+
+      if (napo2 <= 0.85){ point_total(point_total() + 1) }
+
+      # nap reversal
       output$nap_titlerev <- shiny::renderUI({ shiny::tags$h2("NAP Reversability") })
-      output$nap_outrev <- shiny::renderPrint( {
-          nap(.df = final_game_table, .y = "value", .phase = "phase",
-              .time = "time", type = "reversability",
-              phases = list("baseline 1", "baseline 2"), improvement = "positive")
-        } )
+
+      napor <- nap(.df = final_game_table, .y = "value", .phase = "phase",
+                   .time = "time", type = "reversability",
+                   phases = list("baseline 1", "baseline 2"), improvement = "positive")
+
+      if (napor <= 0.85){ point_total(point_total() + 1) }
+
+      output$nap_outrev <- shiny::renderPrint( { napor } )
 
       # Run Mixed Effects Analysis
 
@@ -295,12 +308,45 @@ napjack <- function(){
                                       rev_time_in_phase = TRUE)
 
       tidy_b1 <- broom.mixed::tidy(mem_res$fitted_mod, conf.int = TRUE)
-      tidy_b1 <- tidy_b1[tidy_b1$term == "phasetreatment 1", ]
+      tidy_b1 <- tidy_b1[tidy_b1$term %in% c("phasetreatment 1",
+                                             "time_in_phase:phasetreatment 1") , ]
+      tidy_b1$estimate[[2]] <- -tidy_b1$estimate[[2]]
+      tidy_b1$term[[1]]<- "End of Treatment 1 vs End of Baseline 1"
+      tidy_b1$term[[2]]<- "Rate of Change Treatment 1 vs Baseline 1"
       tidy_b1$ref <- "baseline 1"
 
+      if (tidy_b1$estimate[[1]] > 0 & tidy_b1$p.value[[1]] < 0.1){
+        point_total(point_total() + 1)}
+
+      if (tidy_b1$estimate[[2]] > 0 & tidy_b1$p.value[[2]] < 0.1){
+        point_total(point_total() + 1)}
+
       tidy_b2 <- broom.mixed::tidy(mem_res2$fitted_mod, conf.int = TRUE)
-      tidy_b2 <- tidy_b2[tidy_b2$term %in% c("phasetreatment 1", "phasetreatment 2"), ]
+      print(tidy_b2)
+      tidy_b2 <- tidy_b2[tidy_b2$term %in% c("phasetreatment 1",
+                                             "phasetreatment 2",
+                                             "time_in_phase:phasetreatment 1",
+                                             "time_in_phase:phasetreatment 2"), ]
+      tidy_b2$term[[1]] <- "End of Treatment 1 vs End of Baseline 2"
+      tidy_b2$term[[2]] <- "End of Treatment 2 vs End of Baseline 2"
+      tidy_b2$term[[3]] <- "Rate of Change Treatment 1 vs Baseline 2"
+      tidy_b2$estimate[[3]] <- -tidy_b2$estimate[[3]]
+      tidy_b2$term[[4]] <- "Rate of Change Treatment 2 vs Baseline 2"
+      tidy_b2$estimate[[4]] <- -tidy_b2$estimate[[4]]
       tidy_b2$ref <- "baseline 2"
+
+      if (tidy_b2$estimate[[1]] > 0 & tidy_b2$p.value[[1]] < 0.1){
+        point_total(point_total() + 1)}
+
+      if (tidy_b2$estimate[[2]] > 0 & tidy_b2$p.value[[2]] < 0.1){
+        point_total(point_total() + 1)}
+
+      if (tidy_b2$estimate[[3]] > 0 & tidy_b2$p.value[[3]] < 0.1){
+        point_total(point_total() + 1)}
+
+      if (tidy_b2$estimate[[4]] > 0 & tidy_b2$p.value[[4]] < 0.1){
+        point_total(point_total() + 1)}
+
 
       tidy_all <- rbind(tidy_b1, tidy_b2)
 
@@ -308,6 +354,21 @@ napjack <- function(){
       output$mem_sum <- shiny::renderPrint({tidy_all})
       output$mem_plot_out <- shiny::renderPlot({ mem_res$plot })
       output$mem_out <- shiny::renderPrint({ summary(mem_res$fitted_mod) })
+
+      # Interpret results
+      output$interpretation <- shiny::renderUI({
+        if (point_total() > 7) {
+          shiny::tags$div(
+            shiny::tags$h1(paste0("You Win with ", point_total(), "/9 points."), style = "color: green; font-size: 48px;")
+
+          )
+        } else {
+          shiny::tags$div(
+            shiny::tags$h1(paste0("You Lose with ", point_total(), "/9 points"), style = "color: red; font-size: 48px;")
+          )
+        }
+      })
+
     })
   }
 
