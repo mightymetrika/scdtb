@@ -364,6 +364,10 @@ napjack <- function(){
 
       # reverse time:phase interaction to aide with interpretation
       tidy_b1$estimate[[2]] <- -tidy_b1$estimate[[2]]
+      tidy_b1$statistic[[2]] <- -tidy_b1$statistic[[2]]
+      temp_tidy_b1_conf.low <- tidy_b1$conf.low[[2]]
+      tidy_b1$conf.low[[2]] <- -tidy_b1$conf.high[[2]]
+      tidy_b1$conf.high[[2]] <- -temp_tidy_b1_conf.low
 
       # rename terms for interpretability
       tidy_b1$term[[1]]<- "End of Treatment 1 vs End of Baseline 1"
@@ -390,7 +394,16 @@ napjack <- function(){
 
       # reverse time:phase interaction to aide with interpretation
       tidy_b2$estimate[[3]] <- -tidy_b2$estimate[[3]]
+      tidy_b2$statistic[[3]] <- -tidy_b2$statistic[[3]]
+      temp_tidy_b2_conf.low <- tidy_b2$conf.low[[3]]
+      tidy_b2$conf.low[[3]] <- -tidy_b2$conf.high[[3]]
+      tidy_b2$conf.high[[3]] <- -temp_tidy_b2_conf.low
+
       tidy_b2$estimate[[4]] <- -tidy_b2$estimate[[4]]
+      tidy_b2$statistic[[4]] <- -tidy_b2$statistic[[4]]
+      temp_tidy_b2_conf.low <- tidy_b2$conf.low[[4]]
+      tidy_b2$conf.low[[4]] <- -tidy_b2$conf.high[[4]]
+      tidy_b2$conf.high[[4]] <- -temp_tidy_b2_conf.low
 
       # rename terms for interpretability
       tidy_b2$term[[1]] <- "End of Treatment 1 vs End of Baseline 2"
