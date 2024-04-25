@@ -1,3 +1,37 @@
+#' Nap Jack: A Single Case Design Card Game
+#'
+#' This function creates a Shiny application that implements the Nap Jack card game.
+#' Nap Jack is a single case design card game where the player deals cards in phases
+#' and tries to achieve a winning score based on the analysis of the dealt cards.
+#'
+#' @details The game consists of four phases: baseline 1, treatment 1, baseline 2, and
+#'   treatment 2. In each phase, the player deals six cards and has the option to swap
+#'   cards within a row once per phase. After all four phases are completed, the game
+#'   is scored based on the analysis of the dealt cards using non-overlap of all pairs
+#'   (NAP) and mixed effects modeling.
+#'
+#'   The game utilizes the following internal helper functions:
+#'   - `deal_phase()`: Deals a phase of cards from the game deck.
+#'   - `render_card_grid()`: Renders a grid of card images based on the dealt cards.
+#'   - `swapper()`: Allows swapping of cards within a row of the card matrix.
+#'
+#'   The game also uses the following external functions for analysis:
+#'   - `raw_plot()`: Plots the raw data of the dealt cards.
+#'   - `nap()`: Performs non-overlap of all pairs analysis.
+#'   - `mixed_model_analysis()`: Performs mixed effects modeling analysis.
+#'
+#'   The player's objective is to achieve a winning score by strategically dealing and
+#'   swapping cards to optimize the analysis results.
+#'
+#' @return A Shiny application object that represents the Nap Jack game.
+#'
+#' @examples
+#' # To run the Shiny app
+#' if(interactive()){
+#'   napjack()
+#' }
+#'
+#' @export
 napjack <- function(){
   ui <- shiny::fluidPage(
     theme = shinythemes::shinytheme("paper"),

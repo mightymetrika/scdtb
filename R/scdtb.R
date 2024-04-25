@@ -1,3 +1,36 @@
+#' Single Case Design Toolbox Shiny Application
+#'
+#' This Shiny application provides a toolbox for analyzing single case design data.
+#' It includes features for data upload, data type handling, raw data visualization,
+#' mixed effects analysis, cross-lagged correlation analysis, non-overlap of all pairs
+#' analysis, and randomization tests.
+#'
+#' @return A Shiny app object which can be run to start the application.
+#'
+#' @examples
+#' # To run the Shiny app
+#' if(interactive()){
+#'   scdtb()
+#' }
+#'
+#' @references
+#' Maric, M., & van der Werff, V. (2020). Single-Case ExperimentalDesigns in
+#' Clinical Intervention Research. In R. van de Schoot & M. Miocevic (Eds.),
+#' Small Sample Size Solutions: A Guide for Applied Researchers and Practitioners
+#' (1st ed., pp. 10). Routledge. https://doi.org/10.4324/9780429273872
+#'
+#' What Works Clearinghouse. (2022). What Works Clearinghouse procedures and
+#' standards handbook, version 5.0. U.S. Department of Education, Institute of
+#' Education Sciences, National Center for Education Evaluation and Regional
+#' Assistance (NCEE). This report is available on the What Works Clearinghouse
+#' website at https://ies.ed.gov/ncee/wwc/Handbooks
+#'
+#' Onghena, P. (2020). One by One: The design and analysis of replicated randomized
+#' single-case experiments.In R. van de Schoot & M. Mioecvic (Eds.), Small Sample
+#' Size Solutions: A Guide for Applied Researchers and Practitioners (1st ed., pp.
+#' 15). Routledge. https://doi.org/10.4324/9780429273872
+#'
+#' @export
 scdtb <- function(){
 
   # UI
