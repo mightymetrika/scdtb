@@ -1,3 +1,19 @@
+#' Deal a Phase of Cards
+#'
+#' This function deals a phase of cards from a given deck, consisting of 6 cards.
+#' It returns a list containing the dealt cards as a matrix, the updated deck,
+#' and the individual dealt cards.
+#'
+#' @param .deck A deck of cards created using the `mmcards` package.
+#'
+#' @return A list with the following components:
+#' \describe{
+#'   \item{cards_matrix}{A matrix of the dealt cards, with 1 row and 6 columns.}
+#'   \item{updeck}{The updated deck after dealing the cards.}
+#'   \item{dealt_cards}{A list of the individual dealt cards.}
+#' }
+#'
+#' @keywords internal
 deal_phase <- function(.deck) {
 
 
@@ -14,9 +30,24 @@ deal_phase <- function(.deck) {
 
   # Return results
   return(list(cards_matrix = cards_matrix, updeck = .deck$updated_deck, dealt_cards = dealt_cards))
-  #return(cards_matrix = cards_matrix)
 }
 
+#' Render a Grid of Card Images
+#'
+#' This function takes a matrix of card objects and renders them as a grid of
+#' card images using Shiny's `renderImage` function. The resulting grid is
+#' returned as a Shiny UI component.
+#'
+#' @param new_card_grid A matrix of card objects, where each cell contains a
+#'   card object with an `icard` property specifying the path to the card image.
+#'
+#' @return A Shiny UI component representing the grid of rendered card images.
+#'
+#' @details The function applies `renderImage` to each card object in the matrix,
+#'   creating a grid of card images. The images are displayed in a fluid row
+#'   layout, with each image occupying an equal portion of the available width.
+#'
+#' @keywords internal
 render_card_grid <- function(new_card_grid) {
   rep_card_images <- unlist(apply(new_card_grid, 1, function(row) sapply(row, function(card) {
     shiny::renderImage({
@@ -31,6 +62,29 @@ render_card_grid <- function(new_card_grid) {
   return(card_ui)
 }
 
+#' Swap Cards Within a Row of a Card Matrix
+#'
+#' This function allows swapping of cards within a row of a card matrix. It takes a
+#' card matrix and the indices of the columns to swap. The function modifies the
+#' card matrix in-place and returns the updated matrix.
+#'
+#' @param cards_matrix A matrix of cards representing the current state of the game.
+#' @param swap_in_row A vector of length 2 specifying the indices of the columns to
+#'   swap within a row. If `NULL` (default), no swapping is performed.
+#'
+#' @return The updated card matrix with the specified cards swapped within a row.
+#'
+#' @details The function performs the following steps:
+#'   1. Initializes a move history attribute if it doesn't exist.
+#'   2. Checks if `swap_in_row` is provided and has a length of 2.
+#'   3. Verifies that swapping within a phase has not been performed more than once.
+#'   4. Swaps the cards at the specified column indices within the first row of the matrix.
+#'   5. Updates the move history attribute.
+#'   6. Adds the "swapper" class to the card matrix.
+#'
+#' @note The function modifies the card matrix in-place and returns the updated matrix.
+#'
+#' @keywords internal
 swapper <- function(cards_matrix, swap_in_row = NULL) {
 
   # Initialize move history
