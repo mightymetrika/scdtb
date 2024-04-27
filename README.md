@@ -1,0 +1,43 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# scdtb
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of ‘scdtb’ is to provide tools for the analysis of single case
+design data.
+
+## Installation
+
+To install the development version of ‘scdtb’ from GitHub, use the
+[devtools](https://devtools.r-lib.org/) package:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("mightymetrika/scdtb")
+```
+
+## Analyze Your Data
+
+Use the scdtb() function to launch a ‘shiny’ application which
+implements many of the tools in the ‘scdtb’ package.
+
+The application has the following functionalities:
+
+- Upload a CSV file to be used as the dataset for modeling.
+- View the variables available in the uploaded dataset.
+- Enter the roles played by the variables in the dataset.
+- Create a raw plot of the data.
+- Run a mixed effect model.
+- Run a crossed lag correlation analysis.
+- Run a non-overlap of all pairs computation.
+- Run a randomization test.
+
+``` r
+library(scdtb)
+
+# Launch application
+scdtb()
+```
