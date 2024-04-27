@@ -1,10 +1,23 @@
 Package: scdtb
-Title: What the Package Does (One Line, Title Case)
+Title: Tools for Analyzing Data from Single Case Designs
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Authors@R: c(
+    person("Mackson", "Ncube", , "macksonncube.stats@gmail.com", role = c("aut", "cre")),
+    person("mightymetrika, LLC", role = c("cph", "fnd"))
+  )
+Description: In some situations where researchers would like to demonstrate
+    causal effects, it is hard to obtain a sample size that would allow for a
+    well-powered randomized controlled trial. Single case designs are experimental
+    designs that can be used to demonstrate causal effects with only one participant
+    or with only a few participants. The 'scdtb' package provides a suite of tools
+    for analyzing data from studies that use single case designs. The nap() function
+    can be used to compute the nonoverlap of all pairs as outlined by the What
+    Works Clearinghouse (2022) <https://ies.ed.gov/ncee/wwc/Handbooks>. The
+    package also offers the mixed_model_analysis() and cross_lagged() functions
+    which implement mixed effects models and cross lagged analyses as described
+    in Maric & van der Werff <2020, ISBN:9780429273872>. The scdtb() 'shiny'
+    application can be used to upload single case design data and access various
+    'scdtb' tools for plotting and analysis.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
