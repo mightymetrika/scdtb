@@ -84,5 +84,5 @@ result$conf_int
 Onghena, P. (2020). One by One: The design and analysis of replicated randomized
 single-case experiments.In R. van de Schoot & M. Mioecvic (Eds.), Small Sample
 Size Solutions: A Guide for Applied Researchers and Practitioners (1st ed., pp.
-15). Routledge. https://doi.org/10.4324/9780429273872
+15). Routledge. \url{doi:10.4324/9780429273872-8}
 }

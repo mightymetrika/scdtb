@@ -35,7 +35,7 @@
 #' Designs in Clinical Intervention Research. In R. van de Schoot & M. Miocevic
 #' (Eds.), Small Sample Size Solutions: A Guide for Applied Researchers and
 #' Practitioners (1st ed., pp. 10). Routledge.
-#' https://doi.org/10.4324/9780429273872
+#' <doi:10.4324/9780429273872-9>
 #'
 #' @examples
 #' res <- mixed_model_analysis(efficacy_of_CBT, .dv = "Anxious", .time = "time",
@@ -119,7 +119,7 @@ mixed_model_analysis <- function(.df, .dv, .time, .phase, .participant = NULL,
   mod <- nlme::gls(model       = mod_form,
                    data        = .df,
                    method      = "REML",
-                   correlation = nlme::corAR1(, form=re_form),
+                   correlation = nlme::corAR1(form=re_form),
                    ...)
 
   # Get predicted values
@@ -176,4 +176,3 @@ mixed_model_analysis <- function(.df, .dv, .time, .phase, .participant = NULL,
               plot = ggp))
 
 }
-

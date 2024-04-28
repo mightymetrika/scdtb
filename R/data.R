@@ -41,7 +41,7 @@
 #' Designs in Clinical Intervention Research. In R. van de Schoot & M. Miocevic
 #' (Eds.), Small Sample Size Solutions: A Guide for Applied Researchers and
 #' Practitioners (1st ed., pp. 10). Routledge.
-#' https://doi.org/10.4324/9780429273872
+#' <doi:10.4324/9780429273872-9>
 #'
 #' @format ## `efficacy_of_CBT`
 #' A data frame with 10 rows and 4 columns:
@@ -51,7 +51,7 @@
 #'   \item{Anxious}{Outcome measure}
 #'   \item{CATS_N}{Outcome measure}
 #' }
-#' @source <https://doi.org/10.4324/9780429273872>
+#' @source <doi:10.4324/9780429273872-9>
 "efficacy_of_CBT"
 
 #' Sleeping Pills and Dizziness Example
@@ -61,7 +61,7 @@
 #' @references Onghena, P. (2020). One by one: The design and analysis of
 #' replicated randomized single-case experiments. In R. van de Schoot & M. Miocevic
 #' (Eds.), Small sample size solutions: A guide for applied researchers and
-#' practitioners (1st ed., pp. 15). Routledge. https://doi.org/10.4324/9780429273872
+#' practitioners (1st ed., pp. 15). Routledge. <doi:10.4324/9780429273872-8>
 #'
 #' @format ## `sleeping_pills`
 #' A data frame with 14 rows and 3 columns:
@@ -70,7 +70,7 @@
 #'   \item{treatment}{E, Experimental; C, Control}
 #'   \item{sever_compl}{Severity of complaints}
 #' }
-#' @source <https://doi.org/10.4324/9780429273872>
+#' @source <doi:10.4324/9780429273872-8>
 "sleeping_pills"
 
 

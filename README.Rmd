@@ -22,6 +22,12 @@ The goal of 'scdtb' is to provide tools for the analysis of single case design d
 
 ## Installation
 
+You can install the released version of 'scdtb' from [CRAN](https://CRAN.R-project.org):
+
+```{r eval=FALSE}
+install.packages("scdtb")
+```
+
 To install the development version of 'scdtb' from GitHub, use the [devtools](https://devtools.r-lib.org/) package:
 
 ```{r, eval=FALSE}

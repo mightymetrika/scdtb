@@ -17,7 +17,7 @@
 #' Maric, M., & van der Werff, V. (2020). Single-Case ExperimentalDesigns in
 #' Clinical Intervention Research. In R. van de Schoot & M. Miocevic (Eds.),
 #' Small Sample Size Solutions: A Guide for Applied Researchers and Practitioners
-#' (1st ed., pp. 10). Routledge. https://doi.org/10.4324/9780429273872
+#' (1st ed., pp. 10). Routledge. <doi:10.4324/9780429273872-9>
 #'
 #' What Works Clearinghouse. (2022). What Works Clearinghouse procedures and
 #' standards handbook, version 5.0. U.S. Department of Education, Institute of
@@ -28,7 +28,7 @@
 #' Onghena, P. (2020). One by One: The design and analysis of replicated randomized
 #' single-case experiments.In R. van de Schoot & M. Mioecvic (Eds.), Small Sample
 #' Size Solutions: A Guide for Applied Researchers and Practitioners (1st ed., pp.
-#' 15). Routledge. https://doi.org/10.4324/9780429273872
+#' 15). Routledge. <doi:10.4324/9780429273872-8>
 #'
 #' @export
 scdtb <- function(){

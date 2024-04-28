@@ -1,5 +1,5 @@
 Package: scdtb
-Title: Tools for Analyzing Data from Single Case Designs
+Title: Single Case Design Tools
 Version: 0.0.0.9000
 Authors@R: c(
     person("Mackson", "Ncube", , "macksonncube.stats@gmail.com", role = c("aut", "cre")),
@@ -15,7 +15,9 @@ Description: In some situations where researchers would like to demonstrate
     Works Clearinghouse (2022) <https://ies.ed.gov/ncee/wwc/Handbooks>. The
     package also offers the mixed_model_analysis() and cross_lagged() functions
     which implement mixed effects models and cross lagged analyses as described
-    in Maric & van der Werff <2020, ISBN:9780429273872>. The scdtb() 'shiny'
+    in Maric & van der Werff (2020) <doi:10.4324/9780429273872-9>. The
+    randomization_test() function implements randomization tests based on methods
+    presented in Onghena (2020) <doi:10.4324/9780429273872-8>. The scdtb() 'shiny'
     application can be used to upload single case design data and access various
     'scdtb' tools for plotting and analysis.
 License: MIT + file LICENSE

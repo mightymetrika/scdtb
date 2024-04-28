@@ -11,6 +11,13 @@ design data.
 
 ## Installation
 
+You can install the released version of ‘scdtb’ from
+[CRAN](https://CRAN.R-project.org):
+
+``` r
+install.packages("scdtb")
+```
+
 To install the development version of ‘scdtb’ from GitHub, use the
 [devtools](https://devtools.r-lib.org/) package:
 

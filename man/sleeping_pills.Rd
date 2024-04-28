@@ -16,7 +16,7 @@ A data frame with 14 rows and 3 columns:
 }
 }
 \source{
-\url{https://doi.org/10.4324/9780429273872}
+\url{doi:10.4324/9780429273872-8}
 }
 \usage{
 sleeping_pills
@@ -28,6 +28,6 @@ This is the data set used for the example in Onghena (2020).
 Onghena, P. (2020). One by one: The design and analysis of
 replicated randomized single-case experiments. In R. van de Schoot & M. Miocevic
 (Eds.), Small sample size solutions: A guide for applied researchers and
-practitioners (1st ed., pp. 15). Routledge. https://doi.org/10.4324/9780429273872
+practitioners (1st ed., pp. 15). Routledge. \url{doi:10.4324/9780429273872-8}
 }
 \keyword{datasets}
