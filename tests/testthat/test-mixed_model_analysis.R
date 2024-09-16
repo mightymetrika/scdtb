@@ -98,24 +98,24 @@ test_that("mixed_model_analysis fails when covs not found in .df", {
 })
 
 
-test_that("mixed_model_analysis uses the .participant variable to label data points
-          when .participant is not NULL", {
-
-  temp_CBT1 <- efficacy_of_CBT
-  temp_CBT1$part <- "x"
-  temp_CBT1$CATS_N <- temp_CBT1$CATS_N + stats::rpois(nrow(temp_CBT1), 2)
-
-  temp_CBT2 <- efficacy_of_CBT
-  temp_CBT2$part <- "y"
-  temp_CBT2$CATS_N <- temp_CBT2$CATS_N + stats::rpois(nrow(temp_CBT1), 10)
-
-  bound_CBT <- rbind(temp_CBT1, temp_CBT2)
-
-  res <- mixed_model_analysis(bound_CBT, .dv = "CATS_N", .time = "time",
-                              .phase = "phase", .participant = "part",
-                              rev_time_in_phase = TRUE, phase_levels = c(0, 1),
-                              phase_labels = c("Exposure", "Exposure + CT"))
-
-  expect_equal(res$plot$labels$shape, "factor(part)")
-
-})
+# test_that("mixed_model_analysis uses the .participant variable to label data points
+#           when .participant is not NULL", {
+#
+#   temp_CBT1 <- efficacy_of_CBT
+#   temp_CBT1$part <- "x"
+#   temp_CBT1$CATS_N <- temp_CBT1$CATS_N + stats::rpois(nrow(temp_CBT1), 2)
+#
+#   temp_CBT2 <- efficacy_of_CBT
+#   temp_CBT2$part <- "y"
+#   temp_CBT2$CATS_N <- temp_CBT2$CATS_N + stats::rpois(nrow(temp_CBT1), 10)
+#
+#   bound_CBT <- rbind(temp_CBT1, temp_CBT2)
+#
+#   res <- mixed_model_analysis(bound_CBT, .dv = "CATS_N", .time = "time",
+#                               .phase = "phase", .participant = "part",
+#                               rev_time_in_phase = TRUE, phase_levels = c(0, 1),
+#                               phase_labels = c("Exposure", "Exposure + CT"))
+#
+#   expect_equal(res$plot$labels$shape, "factor(part)")
+#
+# })

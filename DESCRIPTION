@@ -36,7 +36,9 @@ Imports:
     broom.mixed,
     DT,
     ggplot2,
+    MASS,
     mmcards,
     nlme,
     shiny,
-    shinythemes
+    shinythemes,
+    sn
