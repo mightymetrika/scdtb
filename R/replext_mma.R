@@ -1,3 +1,4 @@
+# Modified simulate_mma_once function
 simulate_mma_once <- function(n_timepoints_per_phase, rho, n_phases = 2, n_IDs = 1,
                               betas, formula, covariate_specs = NULL) {
   # Set up data points and phases
@@ -39,7 +40,7 @@ simulate_mma_once <- function(n_timepoints_per_phase, rho, n_phases = 2, n_IDs =
             data_mat <- sn::rmsn(n = n, xi = args$xi, Omega = args$Omega, alpha = args$alpha)
             for (i in seq_along(vars)) {
               df_id[[vars[i]]] <- data_mat[, i]
-              }
+            }
           } else {
             stop("Unsupported multivariate distribution")
           }
@@ -73,25 +74,44 @@ simulate_mma_once <- function(n_timepoints_per_phase, rho, n_phases = 2, n_IDs =
   df_all$time <- rep(1:n_total, times = n_IDs)
 
   # Fit model
-  mod <- nlme::gls(model = formula,
-                   data = df_all,
-                   correlation = nlme::corAR1(form = ~ time | ID),
-                   method = "REML")
+  mod <- tryCatch({
+    nlme::gls(model = formula,
+              data = df_all,
+              correlation = nlme::corAR1(form = ~ time | ID),
+              method = "REML")
+  }, error = function(e) {
+    return(NULL)
+  })
+
+  if (is.null(mod)) {
+    # Model failed to converge
+    return(list(success = FALSE))
+  }
 
   # Extract results
   summary_mod <- summary(mod)
   coefs <- summary_mod$tTable
+  estimates <- coefs[, "Value"]
+  std_errors <- coefs[, "Std.Error"]
   p_values <- coefs[, "p-value"]
 
+  # Compute bias (estimated betas - true betas)
+  bias <- estimates[names(betas)] - betas
+  # Compute RMSE
+  rmse <- sqrt(mean((estimates[names(betas)] - betas)^2))
+
   # Return results
-  return(p_values)
+  return(list(success = TRUE,
+              estimates = estimates,
+              std_errors = std_errors,
+              p_values = p_values,
+              bias = bias,
+              rmse = rmse))
 }
 
-
-# run_simulation function
+# Modified replext_mma function
 replext_mma <- function(n_timepoints_list, rho_list, iterations, n_phases = 2, n_IDs = 1,
-                           betas, formula, covariate_specs = NULL, verbose = FALSE) {
-
+                        betas, formula, covariate_specs = NULL, verbose = FALSE) {
 
   results_list <- list()
   for (n_tp in n_timepoints_list) {
@@ -99,18 +119,67 @@ replext_mma <- function(n_timepoints_list, rho_list, iterations, n_phases = 2, n
       if(verbose){
         cat("Running simulation for n_timepoints_per_phase =", n_tp, "and rho =", rho, "\n")
       }
-      p_values_matrix <- replicate(iterations, {
-        p_values <- simulate_mma_once(n_timepoints_per_phase = n_tp,
-                                      rho = rho,
-                                      n_phases = n_phases,
-                                      n_IDs = n_IDs,
-                                      betas = betas,
-                                      formula = formula,
-                                      covariate_specs = covariate_specs)
-        return(p_values)
-      })
-      type1_errors <- rowMeans(p_values_matrix < 0.05)
-      results_list[[paste("n_tp", n_tp, "rho", rho, sep = "_")]] <- type1_errors
+      # Initialize lists to store outputs
+      success_list <- vector("logical", iterations)
+      estimates_list <- vector("list", iterations)
+      std_errors_list <- vector("list", iterations)
+      p_values_list <- vector("list", iterations)
+      bias_list <- vector("list", iterations)
+      rmse_list <- numeric(iterations)
+
+      for (i in 1:iterations) {
+        res <- simulate_mma_once(n_timepoints_per_phase = n_tp,
+                                 rho = rho,
+                                 n_phases = n_phases,
+                                 n_IDs = n_IDs,
+                                 betas = betas,
+                                 formula = formula,
+                                 covariate_specs = covariate_specs)
+        success_list[i] <- res$success
+        if (res$success) {
+          estimates_list[[i]] <- res$estimates
+          std_errors_list[[i]] <- res$std_errors
+          p_values_list[[i]] <- res$p_values
+          bias_list[[i]] <- res$bias
+          rmse_list[i] <- res$rmse
+        } else {
+          estimates_list[[i]] <- NA
+          std_errors_list[[i]] <- NA
+          p_values_list[[i]] <- NA
+          bias_list[[i]] <- NA
+          rmse_list[i] <- NA
+        }
+      }
+      # Compute success rate
+      success_rate <- mean(success_list)
+      # Compute mean estimates, biases, rmse over successful iterations
+      estimates_matrix <- do.call(rbind, estimates_list[success_list])
+      std_errors_matrix <- do.call(rbind, std_errors_list[success_list])
+      p_values_matrix <- do.call(rbind, p_values_list[success_list])
+      bias_matrix <- do.call(rbind, bias_list[success_list])
+      rmse_vector <- rmse_list[success_list]
+
+      mean_estimates <- colMeans(estimates_matrix, na.rm = TRUE)
+      mean_bias <- colMeans(bias_matrix, na.rm = TRUE)
+      mean_rmse <- mean(rmse_vector, na.rm = TRUE)
+
+      # Compute standard errors of estimates
+      se_estimates <- apply(estimates_matrix, 2, stats::sd, na.rm = TRUE) / sqrt(sum(success_list))
+      # Compute rejection rates
+      rejection_rates <- colMeans(p_values_matrix < 0.05, na.rm = TRUE)
+      # Compute standard error of rejection rates
+      se_rejection_rates <- sqrt(rejection_rates * (1 - rejection_rates) / sum(success_list))
+
+      # Store results
+      results_list[[paste("n_tp", n_tp, "rho", rho, sep = "_")]] <- list(
+        success_rate = success_rate,
+        mean_estimates = mean_estimates,
+        mean_bias = mean_bias,
+        mean_rmse = mean_rmse,
+        se_estimates = se_estimates,
+        rejection_rates = rejection_rates,
+        se_rejection_rates = se_rejection_rates
+      )
     }
   }
   return(results_list)

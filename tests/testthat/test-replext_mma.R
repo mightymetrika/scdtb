@@ -140,6 +140,39 @@ test_that("replext_mma works with two IDs along with correlated skew-normal
   expect_equal(length(results), 4)
 })
 
+test_that("replext_mma works with a covariate correlated with time within phase",{
+
+  # Define covariate_specs with correlation to time_in_phase
+  covariate_specs <- list(
+    list(
+      vars = "X",
+      expr = function(n, df) {
+        X <- df$time_in_phase + rnorm(n)
+        return(data.frame(X = X))
+      }
+    )
+  )
+
+  # Regression coefficients
+  betas <- c("(Intercept)" = 0,
+             "phase1" = 0,
+             "time_in_phase" = 0,
+             "phase1:time_in_phase" = 0,
+             "X" = 0)
+
+  # Run simulation
+  results <- replext_mma(
+    n_timepoints_list = c(10, 20),
+    rho_list = c(0.3, 0.6),
+    iterations = 10,
+    betas = betas,
+    formula = y ~ phase * time_in_phase + X,
+    covariate_specs = covariate_specs,
+    verbose = TRUE
+  )
+
+  expect_equal(length(results), 4)
+})
 # n_timepoints_per_phase <- 5
 # rho <- 0.1
 # n_phases <- 2
