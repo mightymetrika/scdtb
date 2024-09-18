@@ -24,7 +24,7 @@ test_that("replext_mma works with univariate covariates", {
   # Number of iterations
   iterations <- 10
 
-  results <- replext_mma(n_timepoints_list = n_timepoints_list,
+  results <- replext_gls(n_timepoints_list = n_timepoints_list,
                          rho_list = rho_list,
                          iterations = iterations,
                          n_phases = 2,
@@ -33,7 +33,7 @@ test_that("replext_mma works with univariate covariates", {
                          formula = formula,
                          covariate_specs = covariate_specs)
 
-  expect_equal(length(results), 4)
+  expect_equal(ncol(results), 16)
 })
 
 
@@ -75,7 +75,7 @@ test_that("replext_mma works with two IDs along with correlated and univariate c
   # Number of iterations
   iterations <- 10
 
-  results <- replext_mma(n_timepoints_list = n_timepoints_list,
+  results <- replext_gls(n_timepoints_list = n_timepoints_list,
                          rho_list = rho_list,
                          iterations = iterations,
                          n_phases = 2,
@@ -84,7 +84,7 @@ test_that("replext_mma works with two IDs along with correlated and univariate c
                          formula = formula,
                          covariate_specs = covariate_specs)
 
-  expect_equal(length(results), 4)
+  expect_equal(ncol(results), 16)
 })
 
 test_that("replext_mma works with two IDs along with correlated skew-normal
@@ -128,7 +128,7 @@ test_that("replext_mma works with two IDs along with correlated skew-normal
   # Number of iterations
   iterations <- 10
 
-  results <- replext_mma(n_timepoints_list = n_timepoints_list,
+  results <- replext_gls(n_timepoints_list = n_timepoints_list,
                          rho_list = rho_list,
                          iterations = iterations,
                          n_phases = 2,
@@ -137,7 +137,7 @@ test_that("replext_mma works with two IDs along with correlated skew-normal
                          formula = formula,
                          covariate_specs = covariate_specs)
 
-  expect_equal(length(results), 4)
+  expect_equal(ncol(results), 16)
 })
 
 test_that("replext_mma works with a covariate correlated with time within phase",{
@@ -161,17 +161,16 @@ test_that("replext_mma works with a covariate correlated with time within phase"
              "X" = 0)
 
   # Run simulation
-  results <- replext_mma(
+  results <- replext_gls(
     n_timepoints_list = c(10, 20),
     rho_list = c(0.3, 0.6),
     iterations = 10,
     betas = betas,
     formula = y ~ phase * time_in_phase + X,
-    covariate_specs = covariate_specs,
-    verbose = TRUE
+    covariate_specs = covariate_specs
   )
 
-  expect_equal(length(results), 4)
+  expect_equal(ncol(results), 16)
 })
 # n_timepoints_per_phase <- 5
 # rho <- 0.1

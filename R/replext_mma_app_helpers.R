@@ -12,4 +12,5 @@ getUIParams <- function(cellBlock) {
     'phase1:time_in_phase' = 0)"),
     shiny::textAreaInput("formula", "Model formula", "y ~ phase * time_in_phase"),
     shiny::textAreaInput("covariate_specs", "Covariate Specification", "NULL")
-    )}
+  )
+  }
