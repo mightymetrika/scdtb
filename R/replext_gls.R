@@ -379,6 +379,11 @@ plot.replext_gls <- function(x, term, metric = "rejection_rates",
   # Filter data for the specified term
   data <- x[x$term == term, ]
 
+  # Convert color to a factor
+  if (!is.factor(data[[color]])){
+    data[[color]] <- as.factor(data[[color]])
+  }
+
   # Set up labels
   if (is.null(title)) {
     title <- paste("Plot of", metric, "for term:", term)

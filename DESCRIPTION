@@ -38,6 +38,7 @@ Imports:
     ggplot2,
     MASS,
     mmcards,
+    mmints,
     nlme,
     shiny,
     shinythemes,
