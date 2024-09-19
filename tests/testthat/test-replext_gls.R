@@ -33,7 +33,8 @@ test_that("replext_gls works with univariate covariates", {
                          formula = formula,
                          covariate_specs = covariate_specs)
 
-  expect_equal(ncol(results), 16)
+  expect_equal(ncol(results), 18)
+  expect_s3_class(results, "replext_gls")
 })
 
 
@@ -84,7 +85,8 @@ test_that("replext_gls works with two IDs along with correlated and univariate c
                          formula = formula,
                          covariate_specs = covariate_specs)
 
-  expect_equal(ncol(results), 16)
+  expect_equal(ncol(results), 18)
+  expect_s3_class(results, "replext_gls")
 })
 
 test_that("replext_gls works with two IDs along with correlated skew-normal
@@ -137,7 +139,8 @@ test_that("replext_gls works with two IDs along with correlated skew-normal
                                    formula = formula,
                                    covariate_specs = covariate_specs)
 
-            expect_equal(ncol(results), 16)
+            expect_equal(ncol(results), 18)
+            expect_s3_class(results, "replext_gls")
           })
 
 test_that("replext_gls works with a covariate correlated with time within phase",{
@@ -170,7 +173,8 @@ test_that("replext_gls works with a covariate correlated with time within phase"
     covariate_specs = covariate_specs
   )
 
-  expect_equal(ncol(results), 16)
+  expect_equal(ncol(results), 18)
+  expect_s3_class(results, "replext_gls")
 })
 # n_timepoints_per_phase <- 5
 # rho <- 0.1

@@ -1,0 +1,30 @@
+-- Table: public.regls_data
+
+-- DROP TABLE IF EXISTS public.regls_data;
+
+CREATE TABLE IF NOT EXISTS public.regls_data
+(
+    term text COLLATE pg_catalog."default" NOT NULL,
+    tppp integer,
+    rho real,
+    success_rate real,
+    mean_estimates real,
+    mean_bias real,
+    se_estimates real,
+    rejection_rates real,
+    se_rejection_rates real,
+    mean_rmse real,
+    alpha_level real,
+    iterations integer,
+    n_phases integer,
+    n_ids integer,
+    formula text COLLATE pg_catalog."default",
+    betas text COLLATE pg_catalog."default",
+    covariate_specs text COLLATE pg_catalog."default",
+    run_code text COLLATE pg_catalog."default"
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.regls_data
+    OWNER to postgres;

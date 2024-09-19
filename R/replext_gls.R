@@ -206,6 +206,9 @@ replext_gls <- function(n_timepoints_list, rho_list, iterations, n_phases = 2, n
                         betas, formula, covariate_specs = NULL, alpha_level = 0.05,
                         verbose = FALSE) {
 
+  # generate a run_code
+  run_code <- mmints::generateRunCode()
+
   results_df <- data.frame()
   for (n_tp in n_timepoints_list) {
     for (rho in rho_list) {
@@ -284,7 +287,9 @@ replext_gls <- function(n_timepoints_list, rho_list, iterations, n_phases = 2, n
           n_phases = n_phases,
           n_IDs = n_IDs,
           formula = deparse1(formula, collapse = ""),
+          betas = deparse1(betas, collapse = ""),
           covariate_specs = deparse1(covariate_specs, collapse = ""),
+          run_code = run_code,
           stringsAsFactors = FALSE
         )
         # Append to results_df
@@ -311,7 +316,9 @@ replext_gls <- function(n_timepoints_list, rho_list, iterations, n_phases = 2, n
           n_phases = n_phases,
           n_IDs = n_IDs,
           formula = deparse1(formula, collapse = ""),
+          betas = deparse1(betas, collapse = ""),
           covariate_specs = deparse1(covariate_specs, collapse = ""),
+          run_code = run_code,
           stringsAsFactors = FALSE
         )
         # Append to results_df

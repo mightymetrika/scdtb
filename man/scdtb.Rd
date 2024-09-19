@@ -23,7 +23,7 @@ if(interactive()){
 
 }
 \references{
-Maric, M., & van der Werff, V. (2020). Single-Case ExperimentalDesigns in
+Maric, M., & van der Werff, V. (2020). Single-Case Experimental Designs in
 Clinical Intervention Research. In R. van de Schoot & M. Miocevic (Eds.),
 Small Sample Size Solutions: A Guide for Applied Researchers and Practitioners
 (1st ed., pp. 10). Routledge. \url{doi:10.4324/9780429273872-9}
