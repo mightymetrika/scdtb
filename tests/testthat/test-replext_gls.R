@@ -176,17 +176,3 @@ test_that("replext_gls works with a covariate correlated with time within phase"
   expect_equal(ncol(results), 18)
   expect_s3_class(results, "replext_gls")
 })
-# n_timepoints_per_phase <- 5
-# rho <- 0.1
-# n_phases <- 2
-# n_IDs = 1
-# formula <- y ~ phase * time_in_phase
-# # covariate_specs = NULL
-# covariate_specs <- list(
-#   cov1 = list(dist = rnorm, args = list(mean = 0, sd = 1)),
-#   cov2 = list(dist = runif, args = list(min = 0, max = 1))
-# )
-# betas <- c("(Intercept)" = 0,
-#            "phase1" = 0,
-#            "time_in_phase" = 0,
-#            "phase1:time_in_phase" = 0)
